@@ -1162,15 +1162,23 @@ const Auth={
   get user(){return ls.get(CONFIG.USER_KEY,null)},
   normalize(r){return{token:r.token,user:r.user||r.data?.user||r.data}}, // ← 字段不同时改这里
   _set(r){const n=this.normalize(r);if(n.token)ls.set(CONFIG.TOKEN_KEY,n.token);ls.set(CONFIG.USER_KEY,n.user);emit()},
-  /* 微信 / QQ：跳转 Aze 真实授权，回来后由 handleCallback() 处理 */
+  /* 微信 / QQ：优先跳转 Aze 真实授权；授权未配置（回调域名未授权等）时降级演示登录，不阻塞绑定手机号，配好后自动走真实 */
   async oauth(p){
     const type=p==='qq'?'qq':'wx';
     const back=location.origin+location.pathname;
     const qs='?act=login&appid='+AZE.appid+'&appkey='+AZE.appkey+'&type='+type+'&redirect_uri='+encodeURIComponent(back);
     try{sessionStorage.setItem('wys_oauth_p',p)}catch(e){}
-    const d=await socFetch(qs);
+    let d=null;try{d=await socFetch(qs)}catch(e){}
     if(d&&d.code===0&&d.url){location.href=d.url;return new Promise(()=>{})}
-    throw new Error((d&&d.msg)||'登录跳转失败，请重试');
+    return this._demoSocial(p,d&&d.msg);
+  },
+  _demoSocial(p,why){ // 演示兜底：与真实登录共用 PEND_KEY + bindPhone 流程
+    const accountId=p+':demo_'+p,accs=ls.get(ACC_KEY,{});
+    if(accs[accountId]){const user=accs[accountId];this._set({token:'demo.'+p,user});return{user,isNew:false}}
+    ls.set(PEND_KEY,{accountId,provider:p,socialUid:'demo_'+p,nickname:(p==='qq'?'QQ玩家':'微信玩家'),avatar:''});
+    AUTH.provider=p;AUTH.bindToken='demo:'+p;
+    toast((p==='qq'?'QQ':'微信')+'真实授权未启用（'+(why||'回调域名未授权')+'），暂为演示登录');
+    return{needBind:true};
   },
   async handleCallback(){ // Aze 授权回跳：?code=&type= 或 ?aze_login=1&u=
     const q=new URLSearchParams(location.search);
