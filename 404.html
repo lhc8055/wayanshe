@@ -498,6 +498,8 @@ svg.i{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.8;stroke
 /* 我的 */
 .me-c{display:flex;align-items:center;gap:16px;padding:22px;margin-bottom:16px;background:linear-gradient(120deg,#1c0b10,#101016 65%);clip-path:var(--cut);box-shadow:inset 0 0 0 1px rgba(255,59,82,.28)}
 .av{flex:none;width:64px;height:64px;display:grid;place-items:center;font:900 28px var(--en);font-style:italic;color:var(--gold);background:linear-gradient(135deg,#2c2c37,#14141a);border:1px solid var(--line2);clip-path:var(--cut)}
+.av img,.login-btn.in img{width:100%;height:100%;object-fit:cover;display:block}
+.login-btn.in{overflow:hidden}
 .me-c h3{font-size:20px;font-weight:900}
 .me-c p{font-size:12px;color:var(--mut)}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
@@ -1063,7 +1065,7 @@ const VIEWS={
   const f=favs(),d=dones();
   const favItems=f.map(k=>{const[t,id]=k.split(':');const o=byId(t,id);return o?`<button class="chip" data-open="${k}">${esc(o.name||o.cn||o.n||o.title)}</button>`:''}).join('');
   return pageHead({word:'MY',k2:'MY',title:'我的',sub:'欢迎回来，'+esc(u.nickname||'玩家'),nums:[[d.length,'DONE','已学攻略'],[f.length,'SAVED','收藏'],[Math.round(d.length/ARTICLES.length*100),'PERCENT','学习进度 %']]})
-  +`<div class="wrap" style="margin-top:24px"><div class="me-c rv"><div class="av">${esc((u.nickname||'瓦')[0].toUpperCase())}</div><div><h3>${esc(u.nickname||'玩家')}</h3><p>Lv.${esc(u.level??1)} · ID ${esc(u.id??'—')}${u.phone?' · '+esc(u.phone):''}</p></div></div>
+  +`<div class="wrap" style="margin-top:24px"><div class="me-c rv"><div class="av">${u.avatar?`<img src="${esc(u.avatar)}" alt="">`:esc((u.nickname||'瓦')[0].toUpperCase())}</div><div><h3>${esc(u.nickname||'玩家')}</h3><p>Lv.${esc(u.level??1)} · ID ${esc(u.id??'—')}${u.phone?' · '+esc(u.phone):''}</p></div></div>
   ${shead('01','FAVORITES','我的收藏')}
   ${favItems?`<div class="chips rv" style="flex-wrap:wrap;overflow:visible">${favItems}</div>`:`<div class="empty rv">还没有收藏，去看看喜欢的特工和攻略吧</div>`}
   <div class="menu rv"><button data-go="tactics">${ic('route')}继续学习${ic('arrow')}</button><button data-logout>${ic('out')}退出登录${ic('arrow')}</button></div>${footer()}</div>`;
@@ -1101,27 +1103,43 @@ function doSearch(q){
 
 
 /* ---------------- 登录 / 注册 ---------------- */
-const wait=ms=>new Promise(r=>setTimeout(r,ms)),rnd=()=>Math.random().toString(36).slice(2);
-const OA_KEY='wys_mock_oauth';
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+/* ===== Aze 聚合登录（提取自 lv：微信 / QQ 真实授权，返回昵称+头像 faceimg） ===== */
+const AZE={appid:'1077',appkey:'59df768465c656c1afe08091b3840261',proxy:'https://aze-login-proxy.pages.dev/'};
+const ACC_KEY='wys_accounts',PHONE_KEY='wys_phones',PEND_KEY='wys_pend';
+async function socFetch(qs){
+  const direct=AZE.proxy+qs;
+  const roads=[['direct',direct],['euorg','https://cors.eu.org/'+direct],['allorigins','https://api.allorigins.win/raw?url='+encodeURIComponent(direct)],['codetabs','https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(direct)]];
+  const errs=[];
+  for(let i=0;i<roads.length;i++){
+    const tag=roads[i][0],url=roads[i][1];
+    const ctl=typeof AbortController!=='undefined'?new AbortController():null;
+    const timer=ctl?setTimeout(()=>ctl.abort(),7000):null;
+    try{
+      const r=await fetch(url,ctl?{mode:'cors',signal:ctl.signal}:{mode:'cors'});
+      if(timer)clearTimeout(timer);
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const txt=await r.text();let d;try{d=JSON.parse(txt)}catch(e){throw new Error('bad json')}
+      return d;
+    }catch(e){if(timer)clearTimeout(timer);errs.push(tag+' '+((e&&e.message)||'fail'))}
+  }
+  throw new Error(errs.join(' / ')||'network');
+}
+function decodeU(u){
+  let b=String(u).replace(/ /g,'+').replace(/-/g,'+').replace(/_/g,'/');
+  while(b.length%4)b+='=';
+  const bin=atob(b);let pct='';
+  for(let i=0;i<bin.length;i++)pct+='%'+('00'+bin.charCodeAt(i).toString(16)).slice(-2);
+  return JSON.parse(decodeURIComponent(pct));
+}
 const SMS_API='https://wys-sms.pages.dev'; // 9377 短信验证码中转（Cloudflare Pages，国内可达性优于 workers.dev）；为空则退回演示（验证码 123456）
 const smsGet=u=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),15000);return fetch(u,{signal:c.signal}).then(r=>r.json()).catch(e=>({ok:false,msg:e&&e.name==='AbortError'?'请求超时，请检查网络后重试':'网络异常，请检查连接'})).finally(()=>clearTimeout(t))};
-const Mock={ // 账号体系为本地演示；短信验证码走 SMS_API（真实），其余仍本地模拟
-  async oauth({provider}){await wait(900);const u=ls.get(OA_KEY,{})[provider];return u?{token:'mock.'+rnd(),user:u,isNew:false}:{needBind:true,bindToken:'mock:'+provider}},
+const Mock={ // 短信验证码走 SMS_API（真实）；微信/QQ 登录走 Aze，账号存本地
   async sendCode({phone}){
     if(!SMS_API){await wait(500);return{ok:true}}
     const d=await smsGet(SMS_API+'/api/send/'+encodeURIComponent(phone));
     if(!d.ok)throw new Error(d.msg||'发送失败，请稍后重试');
     return{ok:true};
-  },
-  async bindPhone({phone,code,bindToken}){
-    if(SMS_API){
-      const d=await smsGet(SMS_API+'/api/verify?phone='+encodeURIComponent(phone)+'&code='+encodeURIComponent(code));
-      if(!d.ok)throw new Error(d.msg||'验证码错误，请重新输入');
-    }else{
-      await wait(700);if(code!=='123456')throw new Error('验证码错误，请重新输入');
-    }
-    const p=String(bindToken||'').split(':')[1]||'wechat',u={id:String(Date.now()).slice(-6),nickname:(p==='wechat'?'微信玩家':'QQ玩家')+String(Math.random()).slice(2,5),level:1,phone:phone.replace(/^(\d{3})\d{4}(\d{4})$/,'$1****$2')};
-    const k=ls.get(OA_KEY,{});k[p]=u;ls.set(OA_KEY,k);return{token:'mock.'+rnd(),user:u,isNew:true};
   },
   async me(){const u=Auth.user;if(!u)throw new Error('未登录');return{user:u}},
   async logout(){return{}}
@@ -1144,23 +1162,64 @@ const Auth={
   get user(){return ls.get(CONFIG.USER_KEY,null)},
   normalize(r){return{token:r.token,user:r.user||r.data?.user||r.data}}, // ← 字段不同时改这里
   _set(r){const n=this.normalize(r);if(n.token)ls.set(CONFIG.TOKEN_KEY,n.token);ls.set(CONFIG.USER_KEY,n.user);emit()},
-  _res(r,p){if(r.needBind){AUTH.provider=p;AUTH.bindToken=r.bindToken;return{needBind:true}}this._set(r);return{user:this.user,isNew:!!r.isNew}},
-  /* 微信 / QQ：演示模式直接模拟；接后端时先取授权地址并跳转，回来后由 handleCallback() 处理 */
+  /* 微信 / QQ：跳转 Aze 真实授权，回来后由 handleCallback() 处理 */
   async oauth(p){
-    if(!CONFIG.API_BASE)return this._res(await api('oauth',{provider:p}),p);
-    const r=await api('oauthUrl',{provider:p,redirect:location.origin+location.pathname});
-    if(!r.url)throw new Error('授权地址获取失败');
+    const type=p==='qq'?'qq':'wx';
+    const back=location.origin+location.pathname;
+    const qs='?act=login&appid='+AZE.appid+'&appkey='+AZE.appkey+'&type='+type+'&redirect_uri='+encodeURIComponent(back);
     try{sessionStorage.setItem('wys_oauth_p',p)}catch(e){}
-    location.href=r.url;return new Promise(()=>{});
+    const d=await socFetch(qs);
+    if(d&&d.code===0&&d.url){location.href=d.url;return new Promise(()=>{})}
+    throw new Error((d&&d.msg)||'登录跳转失败，请重试');
   },
-  async handleCallback(){ // 授权回调：地址里带 ?code=xxx&state=xxx
-    const q=new URLSearchParams(location.search),code=q.get('code');if(!code)return null;
-    let p=q.get('provider');try{p=p||sessionStorage.getItem('wys_oauth_p')}catch(e){}
+  async handleCallback(){ // Aze 授权回跳：?code=&type= 或 ?aze_login=1&u=
+    const q=new URLSearchParams(location.search);
+    const code=q.get('code'),type=q.get('type'),ret=q.get('aze_login'),u=q.get('u');
+    if(!code&&!ret)return null;
     history.replaceState(null,'',location.pathname+location.hash);
-    return this._res(await api('oauth',{provider:p||'wechat',code,state:q.get('state')}),p||'wechat');
+    let d=null;
+    if(code&&type){d=await socFetch('?act=callback&appid='+AZE.appid+'&appkey='+AZE.appkey+'&type='+encodeURIComponent(type)+'&code='+encodeURIComponent(code))}
+    else if(ret==='1'&&u){try{d=decodeU(u)}catch(e){throw new Error('登录数据解析失败')}}
+    if(!d)return null;
+    return this._socialApply(d);
+  },
+  _socialApply(d){ // 拿到 social_uid/昵称/头像：老账号直接登录，新账号进绑定手机号
+    if(!(d&&d.code===0&&d.social_uid))throw new Error((d&&d.msg)||'登录失败，请重试');
+    const provider=d.type==='qq'?'qq':'wechat';
+    const socialUid=String(d.social_uid);
+    const nickname=String(d.nickname||((provider==='qq'?'QQ':'微信')+'用户'+socialUid.slice(-4))).slice(0,20);
+    let avatar=String(d.faceimg||'').replace(/^http:/,'https:');
+    if(!/^https:\/\//.test(avatar))avatar='';
+    const accountId=provider+':'+socialUid;
+    const accs=ls.get(ACC_KEY,{});
+    if(accs[accountId]){
+      const user=Object.assign({},accs[accountId],{nickname,avatar});
+      accs[accountId]=user;ls.set(ACC_KEY,accs);
+      this._set({token:'aze.'+provider+'.'+socialUid,user});
+      return{user,isNew:false};
+    }
+    ls.set(PEND_KEY,{accountId,provider,socialUid,nickname,avatar});
+    AUTH.provider=provider;AUTH.bindToken='aze:'+provider;
+    return{needBind:true};
   },
   sendCode(phone){return api('sendCode',{phone,bindToken:AUTH.bindToken})},
-  async bindPhone(phone,code){const r=await api('bindPhone',{phone,code,bindToken:AUTH.bindToken,provider:AUTH.provider});this._set(r);return this.user},
+  async bindPhone(phone,code){
+    if(SMS_API){
+      const d=await smsGet(SMS_API+'/api/verify?phone='+encodeURIComponent(phone)+'&code='+encodeURIComponent(code));
+      if(!d.ok)throw new Error(d.msg||'验证码错误，请重新输入');
+    }else{await wait(700);if(code!=='123456')throw new Error('验证码错误，请重新输入')}
+    const pend=ls.get(PEND_KEY,null);
+    if(!pend)throw new Error('登录状态已失效，请重新点击微信/QQ登录');
+    const phones=ls.get(PHONE_KEY,{}),slot=phones[phone]||{};
+    const pn=pend.provider==='qq'?'QQ':'微信';
+    if(slot[pend.provider])throw new Error('该手机号已绑定一个'+pn+'账号；一个手机号最多绑定一个微信和一个QQ');
+    const user={id:String(Date.now()).slice(-6),provider:pend.provider,socialUid:pend.socialUid,nickname:pend.nickname,avatar:pend.avatar,level:1,phone:phone.replace(/^(\d{3})\d{4}(\d{4})$/,'$1****$2'),createdAt:Date.now()};
+    const accs=ls.get(ACC_KEY,{});accs[pend.accountId]=user;ls.set(ACC_KEY,accs);
+    slot[pend.provider]=pend.accountId;phones[phone]=slot;ls.set(PHONE_KEY,phones);
+    ls.del(PEND_KEY);
+    this._set({token:'aze.'+pend.provider+'.'+pend.socialUid,user});
+    return user;
+  },
   async restore(){if(!this.token)return;try{const r=await api('me');const u=r.user||r.data?.user;if(u){ls.set(CONFIG.USER_KEY,u);emit()}}catch(e){if(CONFIG.API_BASE&&e.status===401){ls.del(CONFIG.TOKEN_KEY);ls.del(CONFIG.USER_KEY);emit()}}},
   async logout(){try{await api('logout')}catch(e){}ls.del(CONFIG.TOKEN_KEY);ls.del(CONFIG.USER_KEY);emit()}
 };
@@ -1169,12 +1228,12 @@ function emit(){refreshAuthUI();window.dispatchEvent(new CustomEvent('wys:auth',
 function refreshAuthUI(){
   const u=Auth.user,b=$('#loginBtn');
   document.body.classList.toggle('is-in',!!u);
-  if(u){b.className='login-btn in';b.innerHTML=esc((u.nickname||'瓦')[0].toUpperCase());b.setAttribute('aria-label','我的账号')}
+  if(u){b.className='login-btn in';b.innerHTML=u.avatar?'<img src="'+esc(u.avatar)+'" alt="">':esc((u.nickname||'瓦')[0].toUpperCase());b.setAttribute('aria-label','我的账号')}
   else{b.className='login-btn';b.innerHTML=ic('user')+'登录';b.setAttribute('aria-label','登录')}
   if(cur==='me')mountView('me');
 }
-const WX='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#07C160" d="M9.5 3C5.4 3 2 5.800 2 9.300c0 2 1.100 3.700 2.800 4.900l-.7 2.200 2.600-1.300c.8.200 1.600.4 2.500.4h.5c-.2-.5-.3-1-.3-1.600 0-3.100 3-5.600 6.700-5.600h.4C16.400 5 13.300 3 9.500 3zM6.900 6.600a.9.9 0 110 1.800.9.9 0 010-1.800zm5.200 0a.9.9 0 110 1.800.9.9 0 010-1.800z"/><path fill="#07C160" d="M22 14.200c0-2.800-2.700-5-6-5s-6 2.200-6 5 2.700 5 6 5c.7 0 1.400-.1 2-.3l2 1-.5-1.700c1.500-.9 2.500-2.300 2.500-4zm-7.900-1.100a.8.8 0 110 1.600.8.8 0 010-1.600zm3.800 0a.8.8 0 110 1.600.8.8 0 010-1.600z"/></svg>';
-const QQ='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#12B7F5" d="M12 2C8.700 2 6.500 4.600 6.500 8c0 .9.1 1.600-.2 2.200C5.300 11.700 4 13.800 4 16c0 .9.200 1.400.6 1.700-.3.700-.2 1.400.5 1.800 1 .5 2.300.3 3.200-.5.700.3 1.600.5 2.500.5h2.400c.9 0 1.800-.2 2.500-.5.9.8 2.200 1 3.200.5.7-.4.800-1.100.5-1.800.4-.3.600-.8.600-1.700 0-2.200-1.300-4.300-2.300-5.800-.3-.6-.2-1.300-.2-2.200C17.500 4.600 15.300 2 12 2z"/><ellipse cx="12" cy="9.500" rx="3.200" ry="1.600" fill="#fff"/></svg>';
+const WX='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#07C160" d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"/></svg>';
+const QQ='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#12B7F5" d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"/></svg>';
 const stepLogin=()=>`<div class="astep" data-step="login">
   <div class="auth-h">${kick('无畏契约手游','WELCOME')}<h3 class="auth-t">登录瓦研社</h3><p>微信 / QQ 一键登录，未注册将自动创建账号</p></div>
   <div class="oas">
