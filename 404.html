@@ -1103,8 +1103,8 @@ function doSearch(q){
 /* ---------------- 登录 / 注册 ---------------- */
 const wait=ms=>new Promise(r=>setTimeout(r,ms)),rnd=()=>Math.random().toString(36).slice(2);
 const OA_KEY='wys_mock_oauth';
-const SMS_API='https://sms-9377.3552453862.workers.dev'; // 9377 短信验证码中转（Cloudflare Worker）；为空则退回演示（验证码 123456）
-const smsGet=u=>fetch(u).then(r=>r.json()).catch(()=>({ok:false,msg:'网络异常，请检查连接'}));
+const SMS_API='https://wys-sms.pages.dev'; // 9377 短信验证码中转（Cloudflare Pages，国内可达性优于 workers.dev）；为空则退回演示（验证码 123456）
+const smsGet=u=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),15000);return fetch(u,{signal:c.signal}).then(r=>r.json()).catch(e=>({ok:false,msg:e&&e.name==='AbortError'?'请求超时，请检查网络后重试':'网络异常，请检查连接'})).finally(()=>clearTimeout(t))};
 const Mock={ // 账号体系为本地演示；短信验证码走 SMS_API（真实），其余仍本地模拟
   async oauth({provider}){await wait(900);const u=ls.get(OA_KEY,{})[provider];return u?{token:'mock.'+rnd(),user:u,isNew:false}:{needBind:true,bindToken:'mock:'+provider}},
   async sendCode({phone}){
