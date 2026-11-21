@@ -1105,7 +1105,7 @@ function doSearch(q){
 /* ---------------- 登录 / 注册 ---------------- */
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 /* ===== Aze 聚合登录（提取自 lv：微信 / QQ 真实授权，返回昵称+头像 faceimg） ===== */
-const AZE={appid:'1077',appkey:'59df768465c656c1afe08091b3840261',proxy:'https://aze-login-proxy.pages.dev/'};
+const AZE={proxy:'https://wys-sms.pages.dev/aze'}; // 凭据 2169 固定在 wys-sms 服务端，前端不再暴露
 const ACC_KEY='wys_accounts',PHONE_KEY='wys_phones',PEND_KEY='wys_pend';
 async function socFetch(qs){
   const direct=AZE.proxy+qs;
@@ -1166,7 +1166,7 @@ const Auth={
   async oauth(p){
     const type=p==='qq'?'qq':'wx';
     const back=location.origin+location.pathname;
-    const qs='?act=login&appid='+AZE.appid+'&appkey='+AZE.appkey+'&type='+type+'&redirect_uri='+encodeURIComponent(back);
+    const qs='?act=login&type='+type+'&redirect_uri='+encodeURIComponent(back);
     try{sessionStorage.setItem('wys_oauth_p',p)}catch(e){}
     let d=null;try{d=await socFetch(qs)}catch(e){}
     if(d&&d.code===0&&d.url){location.href=d.url;return new Promise(()=>{})}
@@ -1186,7 +1186,7 @@ const Auth={
     if(!code&&!ret)return null;
     history.replaceState(null,'',location.pathname+location.hash);
     let d=null;
-    if(code&&type){d=await socFetch('?act=callback&appid='+AZE.appid+'&appkey='+AZE.appkey+'&type='+encodeURIComponent(type)+'&code='+encodeURIComponent(code))}
+    if(code&&type){d=await socFetch('?act=callback&type='+encodeURIComponent(type)+'&code='+encodeURIComponent(code))}
     else if(ret==='1'&&u){try{d=decodeU(u)}catch(e){throw new Error('登录数据解析失败')}}
     if(!d)return null;
     return this._socialApply(d);
