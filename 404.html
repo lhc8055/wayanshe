@@ -830,7 +830,7 @@ const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HERO_IMAGES=['','',''];   // ← 首页三张轮播图（可选）：['assets/hero-1.jpg','assets/hero-2.jpg','assets/hero-3.jpg']
 
 const CONFIG={
-  API_BASE:'https://wys-sms.pages.dev', // ← 账号/短信后端（Cloudflare Pages，service_role 仅在服务端，前端不碰数据库）
+  API_BASE:'https://api.wayanshe.xyz', // ← 账号/短信后端（Cloudflare Pages，service_role 仅在服务端，前端不碰数据库）
   ENDPOINTS:{                        // ← 全部为 POST + JSON，登录态用 Authorization: Bearer <token>
     oauthUrl:'/auth/oauth/url',      //   {provider:'wechat'|'qq', redirect}            → {url}  前端跳转到微信/QQ授权页
     oauth:'/auth/oauth',             //   {provider, code, state}（授权回调带回）       → 老用户 {token,user}；新用户 {needBind:true, bindToken}
@@ -1107,7 +1107,7 @@ function doSearch(q){
 /* ---------------- 登录 / 注册 ---------------- */
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 /* ===== Aze 聚合登录（提取自 lv：微信 / QQ 真实授权，返回昵称+头像 faceimg） ===== */
-const AZE={proxy:'https://wys-sms.pages.dev/aze'}; // 凭据 2169 固定在 wys-sms 服务端，前端不再暴露
+const AZE={proxy:'https://api.wayanshe.xyz/aze'}; // 凭据 2169 固定在 wys-sms 服务端，前端不再暴露
 const ACC_KEY='wys_accounts',PHONE_KEY='wys_phones',PEND_KEY='wys_pend';
 async function socFetch(qs){
   const direct=AZE.proxy+qs;
@@ -1134,7 +1134,7 @@ function decodeU(u){
   for(let i=0;i<bin.length;i++)pct+='%'+('00'+bin.charCodeAt(i).toString(16)).slice(-2);
   return JSON.parse(decodeURIComponent(pct));
 }
-const SMS_API='https://wys-sms.pages.dev'; // 9377 短信验证码中转（Cloudflare Pages，国内可达性优于 workers.dev）；为空则退回演示（验证码 123456）
+const SMS_API='https://api.wayanshe.xyz'; // 9377 短信验证码中转（Cloudflare Pages，国内可达性优于 workers.dev）；为空则退回演示（验证码 123456）
 const smsGet=u=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),15000);return fetch(u,{signal:c.signal}).then(r=>r.json()).catch(e=>({ok:false,msg:e&&e.name==='AbortError'?'请求超时，请检查网络后重试':'网络异常，请检查连接'})).finally(()=>clearTimeout(t))};
 const Mock={ // 短信验证码走 SMS_API（真实）；微信/QQ 登录走 Aze，账号存本地
   async sendCode({phone}){
