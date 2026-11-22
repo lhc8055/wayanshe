@@ -830,12 +830,14 @@ const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HERO_IMAGES=['','',''];   // ← 首页三张轮播图（可选）：['assets/hero-1.jpg','assets/hero-2.jpg','assets/hero-3.jpg']
 
 const CONFIG={
-  API_BASE:'',                       // ← 后端地址，例如 'https://api.example.com'
+  API_BASE:'https://wys-sms.pages.dev', // ← 账号/短信后端（Cloudflare Pages，service_role 仅在服务端，前端不碰数据库）
   ENDPOINTS:{                        // ← 全部为 POST + JSON，登录态用 Authorization: Bearer <token>
     oauthUrl:'/auth/oauth/url',      //   {provider:'wechat'|'qq', redirect}            → {url}  前端跳转到微信/QQ授权页
     oauth:'/auth/oauth',             //   {provider, code, state}（授权回调带回）       → 老用户 {token,user}；新用户 {needBind:true, bindToken}
-    sendCode:'/auth/phone/code',     //   {phone, bindToken}                            → {ok:true}
-    bindPhone:'/auth/phone/bind',    //   {phone, code, bindToken, provider}            → {token,user,isNew:true}
+    social:'/auth/social',           //   {provider,socialUid,nickname,avatar,sig}      → 老用户 {token,user,isNew:false}；新用户 {needBind:true}
+    sendCode:'/auth/phone/code',     //   {phone}                                       → {ok:true}；冷却 429 + retryAfter
+    bindPhone:'/auth/phone/bind',    //   {provider,socialUid,sig,phone,code,...}       → {token,user,isNew:true}
+    migrate:'/auth/migrate',         //   {accounts:[...]}                              → {done,skip} 本地旧账号一次性上云
     me:'/auth/me',logout:'/auth/logout'},
   TOKEN_KEY:'wys_token',USER_KEY:'wys_user',TIMEOUT:10000
 };
@@ -1151,7 +1153,7 @@ async function api(name,body){
     const h={'Content-Type':'application/json'};const t=Auth.token;if(t)h.Authorization='Bearer '+t;
     const res=await fetch(CONFIG.API_BASE+CONFIG.ENDPOINTS[name],{method:'POST',headers:h,body:JSON.stringify(body||{}),signal:ctl.signal});
     let data={};try{data=await res.json()}catch(e){}
-    if(!res.ok){const er=new Error(data.message||'请求失败（'+res.status+'）');er.status=res.status;throw er}
+    if(!res.ok){const er=new Error(data.message||data.msg||('请求失败（'+res.status+'）'));er.status=res.status;if(data.retryAfter)er.retryAfter=data.retryAfter;throw er}
     return data;
   }catch(e){if(e.name==='AbortError')throw new Error('请求超时，请稍后重试');if(e instanceof TypeError)throw new Error('网络异常，请检查连接');throw e}
   finally{clearTimeout(tm)}
@@ -1191,7 +1193,7 @@ const Auth={
     if(!d)return null;
     return this._socialApply(d);
   },
-  _socialApply(d){ // 拿到 social_uid/昵称/头像：老账号直接登录，新账号进绑定手机号
+  async _socialApply(d){ // 拿到 social_uid/昵称/头像：老账号直接登录，新账号进绑定手机号
     if(!(d&&d.code===0&&d.social_uid))throw new Error((d&&d.msg)||'登录失败，请重试');
     const provider=d.type==='qq'?'qq':'wechat';
     const socialUid=String(d.social_uid);
@@ -1199,6 +1201,16 @@ const Auth={
     let avatar=String(d.faceimg||'').replace(/^http:/,'https:');
     if(!/^https:\/\//.test(avatar))avatar='';
     const accountId=provider+':'+socialUid;
+    const sig=String(d.sig||'');
+    // 真实账号：worker 校验签名后查库，老号直接登录、新号返回 needBind；sig 由 /aze?act=callback 下发
+    if(CONFIG.API_BASE&&sig&&!socialUid.startsWith('demo_')){
+      const r=await api('social',{provider,socialUid,nickname,avatar,sig});
+      if(r&&r.token){this._set(r);return{user:r.user,isNew:!!r.isNew}}
+      ls.set(PEND_KEY,{accountId,provider,socialUid,nickname,avatar,sig});
+      AUTH.provider=provider;AUTH.bindToken='aze:'+provider;
+      return{needBind:true};
+    }
+    // 降级：无后端或无签名（旧 worker 未下发 sig）时走本地存储
     const accs=ls.get(ACC_KEY,{});
     if(accs[accountId]){
       const user=Object.assign({},accs[accountId],{nickname,avatar});
@@ -1212,12 +1224,21 @@ const Auth={
   },
   sendCode(phone){return api('sendCode',{phone,bindToken:AUTH.bindToken})},
   async bindPhone(phone,code){
+    const pend=ls.get(PEND_KEY,null);
+    if(!pend)throw new Error('登录状态已失效，请重新点击微信/QQ登录');
+    const isDemo=String(pend.socialUid||'').startsWith('demo_');
+    if(!isDemo&&CONFIG.API_BASE){
+      // 真实账号：worker 校验短信码 + 唯一性，前端不重复校验、不落本地
+      const r=await api('bindPhone',{phone,code,provider:pend.provider,socialUid:pend.socialUid,sig:pend.sig,nickname:pend.nickname,avatar:pend.avatar});
+      ls.del(PEND_KEY);
+      this._set(r);
+      return r.user;
+    }
+    // 演示账号 / 无后端：保留本地校验与存储
     if(SMS_API){
       const d=await smsGet(SMS_API+'/api/verify?phone='+encodeURIComponent(phone)+'&code='+encodeURIComponent(code));
       if(!d.ok)throw new Error(d.msg||'验证码错误，请重新输入');
     }else{await wait(700);if(code!=='123456')throw new Error('验证码错误，请重新输入')}
-    const pend=ls.get(PEND_KEY,null);
-    if(!pend)throw new Error('登录状态已失效，请重新点击微信/QQ登录');
     const phones=ls.get(PHONE_KEY,{}),slot=phones[phone]||{};
     const pn=pend.provider==='qq'?'QQ':'微信';
     if(slot[pend.provider])throw new Error('该手机号已绑定一个'+pn+'账号；一个手机号最多绑定一个微信和一个QQ');
@@ -1231,6 +1252,23 @@ const Auth={
   async restore(){if(!this.token)return;try{const r=await api('me');const u=r.user||r.data?.user;if(u){ls.set(CONFIG.USER_KEY,u);emit()}}catch(e){if(CONFIG.API_BASE&&e.status===401){ls.del(CONFIG.TOKEN_KEY);ls.del(CONFIG.USER_KEY);emit()}}},
   async logout(){try{await api('logout')}catch(e){}ls.del(CONFIG.TOKEN_KEY);ls.del(CONFIG.USER_KEY);emit()}
 };
+// 一次性把本地旧账号（非演示）迁移到 Supabase，之后跨设备登录可被识别；失败不阻塞
+function migrateLocal(){
+  try{
+    if(!CONFIG.API_BASE||ls.get('wys_migrated'))return;
+    const accs=ls.get(ACC_KEY,{})||{},phones=ls.get(PHONE_KEY,{})||{};
+    const accToRaw={}; // accountId -> 原始手机号（PHONE_KEY 是 rawPhone->{provider:accountId}）
+    for(const raw in phones){const slot=phones[raw]||{};for(const p in slot){if(slot[p])accToRaw[slot[p]]=raw}}
+    const list=[];
+    for(const accountId in accs){
+      const a=accs[accountId]||{};const uid=String(a.socialUid||'');
+      if(!uid||uid.startsWith('demo_'))continue;
+      list.push({provider:a.provider,socialUid:uid,nickname:a.nickname||'',avatar:a.avatar||'',phone:a.phone||'',phoneRaw:accToRaw[accountId]||'',level:a.level||1});
+    }
+    ls.set('wys_migrated','1');
+    if(list.length)api('migrate',{accounts:list}).catch(()=>{});
+  }catch(e){}
+}
 
 function emit(){refreshAuthUI();window.dispatchEvent(new CustomEvent('wys:auth',{detail:Auth.user}))}
 function refreshAuthUI(){
@@ -1600,6 +1638,7 @@ if(INTRO){try{sessionStorage.setItem('wys_i','1')}catch(e){}setTimeout(boot,1000
 else{boot();const i=$('#intro');i&&i.remove()}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{MQ.forEach(m=>m.w=0);measureMQ();moveLens(false);$$('.chips').forEach(b=>pillTo(b,false))});
 Auth.restore();
+migrateLocal();
 Auth.handleCallback().then(r=>{if(r&&r.needBind)openBind();else if(r&&r.user)toast(r.isNew?'欢迎加入瓦研社':'登录成功，欢迎回来')}).catch(e=>toast(e.message||'登录失败'));
 window.WYS={Auth,CONFIG,openLogin,toast,data:{AGENTS,MAPS,UTILS,ECO,ARTICLES}};
 })();
