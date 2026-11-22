@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -263,7 +264,7 @@ svg.i{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.8;stroke
 
 /* ---------- 转场幕布 ---------- */
 .curtain{position:fixed;inset:0;z-index:90;pointer-events:none;visibility:hidden;overflow:hidden}
-.curtain i{position:absolute;top:-4%;bottom:-4%;left:-15%;width:130%;transform:translateX(-125%) skewX(-14deg)}
+.curtain i{will-change:transform;backface-visibility:hidden;position:absolute;top:-4%;bottom:-4%;left:-15%;width:130%;transform:translateX(-125%) skewX(-14deg)}
 .curtain .c1{background:var(--red)}
 .curtain .c2{background:#09090d}
 
@@ -737,6 +738,134 @@ a[data-h]{cursor:pointer}
 .getc:active{transform:scale(.94)}
 .getc:disabled{color:var(--dim);background:rgba(255,255,255,.05);pointer-events:none}
 .demo{font-size:12px;color:var(--dim);text-align:center;margin-top:2px}
+
+/* ===== v6：地图列表 / 详情页 ===== */
+.mp-g{top:34px}
+.mp-n{position:absolute;left:12px;top:12px;z-index:1;font:800 11px var(--en);letter-spacing:.14em;padding:4px 9px;background:var(--red);color:#fff;transform:skewX(-14deg)}
+.mp-n.last{background:linear-gradient(135deg,#f3dba0,#c9a24f);color:#1a1306}
+.mp-i{z-index:1}
+.mp-i em{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.mp-m{display:flex;gap:6px;margin-top:9px}
+.mp-m i{font:700 10.5px var(--en);font-style:normal;letter-spacing:.06em;padding:3px 8px;color:#ff8794;background:rgba(255,59,82,.16);border:1px solid rgba(255,59,82,.3)}
+.mp-m i.d{color:var(--gold);background:rgba(232,198,128,.12);border-color:rgba(232,198,128,.3)}
+.mp-m i.r{color:var(--silver);background:rgba(255,255,255,.07);border-color:var(--line2)}
+.mrc{display:flex;align-items:center;gap:8px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
+.mrc::-webkit-scrollbar{display:none}
+.mrc small{flex:none;font:700 10.5px var(--en);letter-spacing:.24em;color:var(--mut);margin-right:4px}
+.mrc button{flex:none;height:34px;padding:0 16px;font-size:13px;font-weight:700;background:rgba(255,255,255,.06);border:1px solid var(--line2);transform:skewX(-12deg)}
+.mrc button i{display:block;font-style:normal;transform:skewX(12deg)}
+.mrc button.first{border-color:var(--red);color:#fff;background:rgba(255,59,82,.14)}
+
+.mx{position:fixed;inset:0;z-index:95;pointer-events:none;visibility:hidden}
+.mx.on{visibility:visible;pointer-events:auto}
+.mx-c{position:absolute;inset:0;overflow:hidden;background:#08080c;will-change:clip-path,opacity}
+.mx-bg{position:absolute;left:0;top:0;width:100%;height:var(--vh);background-size:cover;background-position:center;transform-origin:50% 40%}
+.mx-g{position:absolute;inset:0;background:linear-gradient(0deg,rgba(6,6,10,.85),transparent 55%),radial-gradient(90% 60% at 100% 0,rgba(255,59,82,.3),transparent 70%)}
+.mx-sl{position:absolute;top:-10%;bottom:-10%;left:0;width:26%;background:var(--red);transform:translateX(-130%) skewX(-14deg);opacity:.92}
+.mx-sl.b{width:8%;background:#fff;opacity:.8}
+.mx-hud{position:absolute;inset:0;opacity:0;font:700 11px var(--en);letter-spacing:.3em;color:rgba(255,255,255,.7)}
+.mx-hud span{position:absolute;top:calc(var(--hh) + 6px);left:20px}
+.mx-hud span+span{left:auto;right:20px}
+.mx-hud i{position:absolute;background:rgba(255,255,255,.35)}
+.mx-hud .l1{left:20px;right:20px;top:calc(var(--hh) + 30px);height:1px}
+.mx-hud .l2{left:20px;right:20px;bottom:calc(50% - 84px);height:1px}
+.mx-t{position:absolute;left:20px;right:20px;top:50%;margin-top:-84px}
+.mx-t small{display:block;font:700 11px var(--en);letter-spacing:.34em;color:var(--red);margin-bottom:8px}
+.mx-t h2{font:italic 900 clamp(64px,22vw,150px)/1.04 var(--en);letter-spacing:.01em}
+.mx-t em{display:block;margin-top:6px;font:700 13px var(--en);font-style:normal;letter-spacing:.5em;color:var(--silver);text-transform:uppercase}
+.mx-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.mx .c{transform:none;transition:none}
+
+.mdp-hero{position:relative;overflow:hidden;background:#08080c}
+.mdp-bg{position:absolute;left:0;top:0;width:100%;height:var(--vh);background-size:cover;background-position:center;transform-origin:50% 30%}
+.mdp-hero::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(0deg,var(--bg) 1%,rgba(6,6,10,.35) 55%,rgba(6,6,10,.45)),radial-gradient(120% 80% at 90% 0,hsl(var(--h) 80% 45%/.3),transparent 60%)}
+.mdp-word{position:absolute;z-index:1;right:-4%;top:calc(var(--hh) + 34px);font:900 italic clamp(70px,27vw,220px)/1 var(--en);color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.15);white-space:nowrap;pointer-events:none}
+.mdp-back{position:absolute;z-index:3;left:14px;top:calc(var(--hh) + 6px);height:36px;padding:0 14px 0 10px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;background:rgba(0,0,0,.45);border:1px solid var(--line2);border-radius:12px;transition:transform .3s var(--ease)}
+.mdp-back svg{font-size:17px;transform:scaleX(-1)}
+.mdp-back:active{transform:scale(.93)}
+.mdp-t{position:absolute;z-index:2;left:16px;right:16px;bottom:22px}
+.mdp-t h1{font:italic 900 clamp(48px,14vw,92px)/1.04 var(--en);margin:14px 0 0 4px}
+.mdp-en{margin:6px 0 14px 4px;font:700 12px var(--en);letter-spacing:.42em;color:var(--silver);text-transform:uppercase}
+.mdp-tags{display:flex;flex-wrap:wrap;gap:6px;margin-left:4px}
+.mdp-tags span{display:inline-block;background:rgba(0,0,0,.5);border:1px solid var(--line2);transform:skewX(-14deg);opacity:0}
+.mdp-tags i{display:block;font-style:normal;transform:skewX(14deg);padding:5px 12px;font-size:12px;font-weight:700}
+.view[data-view=mapd]:not(.go) .mdp-hero .c{transform:translateY(115%) skewY(9deg)!important;transition:none!important}
+.view[data-view=mapd]:not(.go) .mdp-hero .kick{opacity:0!important;animation:none!important}
+.view.go .mdp-bg{animation:mdbg 1.4s var(--ease) backwards}
+.view.go .mdp-word{animation:mdw 1.1s var(--ease) .1s backwards}
+.view.go .mdp-back{animation:rise .7s var(--ease) .25s backwards}
+.view.go .mdp-tags span{opacity:1;animation:kin .8s var(--ease) calc(.45s + var(--i)*70ms) backwards}
+@keyframes mdbg{from{transform:scale(1.08)}}
+@keyframes mdw{from{opacity:0;transform:translateX(70px)}}
+.mdn{position:sticky;top:var(--hh);z-index:40;margin-top:0;margin-bottom:0;padding:10px 12px;background:rgba(8,8,12,.94);border-bottom:1px solid var(--line)}
+.mds{padding-top:34px}
+.mdq p{font-size:17px;line-height:1.75;color:#dcdce5;border-left:3px solid var(--red);padding-left:14px}
+.mdf{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
+.mdf div{padding:12px 6px;text-align:center;background:var(--panel);border:1px solid var(--line)}
+.mdf b{display:block;font:italic 900 22px var(--en);color:var(--red)}
+.mdf small{font-size:10.5px;color:var(--mut)}
+.mm-frame{position:relative;aspect-ratio:1;width:min(100%,440px);margin:0 auto;background:#0a0a0f;border:1px solid var(--line2);overflow:hidden}
+.mm-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:12.5% 12.5%}
+.mm-c{position:absolute;z-index:3;width:16px;height:16px;border:2px solid var(--red)}
+.mm-c.tl{left:6px;top:6px;border-right:0;border-bottom:0}.mm-c.tr{right:6px;top:6px;border-left:0;border-bottom:0}
+.mm-c.bl{left:6px;bottom:6px;border-right:0;border-top:0}.mm-c.br{right:6px;bottom:6px;border-left:0;border-top:0}
+.mm-scan{position:absolute;left:0;right:0;top:0;height:30%;background:linear-gradient(180deg,transparent,rgba(255,59,82,.16));border-bottom:1px solid rgba(255,59,82,.6);transform:translateY(-100%);pointer-events:none}
+.mm.in .mm-scan{animation:mmscan 3.6s linear infinite}
+@keyframes mmscan{to{transform:translateY(340%)}}
+.mm-n{position:absolute;left:50%;top:8px;z-index:3;transform:translateX(-50%);font:900 12px var(--en);color:var(--red)}
+.mm-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;color:var(--mut);font-size:12px;line-height:1.6}
+.mm-ph svg{font-size:40px;color:var(--red);opacity:.8}.mm-ph b{font-size:15px;color:var(--txt)}
+.mm-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:1}
+.mm-pins{position:absolute;inset:0;z-index:2}
+.ag-i{position:absolute;z-index:0;left:50%;bottom:0;height:96%;width:auto;max-width:none;transform:translateX(-46%);object-fit:contain;pointer-events:none;-webkit-user-drag:none}
+.ag-r,.ag-n{z-index:2}
+.sh-i{position:absolute;right:8px;bottom:0;height:116%;max-height:190px;width:auto;object-fit:contain;pointer-events:none;z-index:1}
+.sh-hero>div{z-index:2}
+.sh-hero{overflow:visible;clip-path:inset(-60px 0 0 0)}
+.mm-pin{position:absolute;left:calc(var(--x)*100%);top:calc(var(--y)*100%);transform:translate(-50%,-50%)}
+.mm-pin i{display:block;width:12px;height:12px;border-radius:50%;background:var(--red);box-shadow:0 0 0 4px rgba(255,59,82,.25)}
+.mm-pin.def i{background:var(--gold);box-shadow:0 0 0 4px rgba(232,198,128,.25)}
+.mm-pin span{position:absolute;left:50%;top:16px;transform:translateX(-50%);white-space:nowrap;font-size:10.5px;font-weight:700;padding:1px 6px;background:rgba(0,0,0,.7)}
+.mm-pins[data-side=atk] .mm-pin.def,.mm-pins[data-side=def] .mm-pin.atk{display:none}
+.mm-tools{display:flex;justify-content:center;gap:8px;margin-top:14px}
+.mm-tip{text-align:center;font-size:12px;color:var(--dim);margin-top:10px}
+.md-t{--c:var(--red);display:flex;gap:14px;padding:16px;margin-bottom:10px;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--c)}
+.md-t.def{--c:var(--gold)}
+.md-n{flex:none;min-width:36px;font:italic 900 28px/1 var(--en);color:var(--c)}
+.md-t em{display:block;font:700 10px var(--en);font-style:normal;letter-spacing:.26em;color:var(--c);margin-bottom:4px}
+.md-t p{font-size:14.5px;line-height:1.7;color:#d5d5de}
+.md-rec{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.md-ag{display:flex;align-items:center;gap:12px;padding:12px;background:var(--panel);border:1px solid var(--line);transition:transform .3s var(--ease),border-color .25s}
+.md-ag:active{transform:scale(.96);border-color:var(--red)}
+.md-ag span{flex:none;width:40px;height:40px;display:grid;place-items:center;font:italic 900 20px var(--en);background:var(--red)}
+.md-ag b{display:block;font-size:15px}.md-ag em{font-style:normal;font-size:11px;color:var(--mut)}
+.md-pn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:34px 0 8px}
+.md-pn button{padding:14px;background:var(--panel);border:1px solid var(--line);transition:transform .3s var(--ease),border-color .25s}
+.md-pn button:active{transform:scale(.97);border-color:var(--red)}
+.md-pn .nx{text-align:right}
+.md-pn small{display:block;font:700 10px var(--en);letter-spacing:.24em;color:var(--mut)}
+.md-pn b{font-size:17px;font-style:italic}
+
+/* ===== v6：搜索性能（不改视觉，把重绘换成合成层动画） ===== */
+.spanel{clip-path:none!important;-webkit-backdrop-filter:none;backdrop-filter:none;background:transparent;opacity:1;visibility:hidden;transition:visibility 0s .55s;contain:layout paint}
+.srch .spanel{visibility:visible;transition:visibility 0s}
+.spanel::before{content:"";position:absolute;inset:0;background:rgba(6,6,10,.965);transform:scaleY(0);transform-origin:top;transition:transform .55s cubic-bezier(.7,0,.2,1);will-change:transform}
+.srch .spanel::before{transform:none;transition-delay:.1s}
+.spi{position:relative;opacity:0;transition:opacity .25s ease}
+.srch .spi{opacity:1;transition:opacity .4s ease .35s}
+.srch .top.lg::after{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(8,8,12,.94)}
+.srch .sbar{transition:clip-path .6s cubic-bezier(.7,0,.2,1),opacity .08s,border-color .5s .2s}
+.sbar{will-change:clip-path}
+.sglow{position:absolute;left:0;right:0;bottom:-1px;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent,var(--red),transparent);opacity:0;transform:scaleX(.15);transition:opacity .4s,transform .8s var(--ease)}
+.srch .sglow{opacity:.85;transform:none}
+.lens.mv{transition:none}
+.lens{transform-origin:50% 50%}
+
+/* ===== v6：超椭圆（只用于原本就有圆角的元素） ===== */
+@supports (corner-shape:squircle){.ib,.login-btn,.tile-ic,.x,.oa,.oa-i,.atip,.getc,.sbar-c,.fld,.mdp-back,.sheet,.dock,.lens{corner-shape:squircle}}
+.sqf{border-radius:0!important;border-color:transparent!important}
+.sqf.sqp{position:relative}
+.sqr{position:absolute;pointer-events:none;z-index:2}
 </style>
 </head>
 <body>
@@ -781,6 +910,7 @@ a[data-h]{cursor:pointer}
     <span class="bname"><b>瓦研社<i class="mtag">手游</i></b><em>VALORANT MOBILE</em></span>
   </a>
   <div class="sbar" id="sbar"><span class="sbar-ic" id="sbarIc"></span><input id="q" type="search" placeholder="搜索特工、地图、道具、攻略" autocomplete="off" enterkeyhint="search" aria-label="搜索"><button class="sbar-x" id="sclear" aria-label="清空" type="button"></button><button class="sbar-c" id="scancel" type="button">取消</button></div>
+  <i class="sglow" id="sglow"></i>
   <div class="tr">
     <button class="ib" id="searchBtn" aria-label="搜索"></button>
     <button class="login-btn" id="loginBtn"></button>
@@ -794,6 +924,7 @@ a[data-h]{cursor:pointer}
   <section class="view" data-view="maps"></section>
   <section class="view" data-view="tactics"></section>
   <section class="view" data-view="me"></section>
+  <section class="view" data-view="mapd"></section>
 </main>
 <nav class="dock" id="dock" aria-label="主导航"></nav>
 <div class="ov" id="ov" aria-hidden="true">
@@ -805,6 +936,7 @@ a[data-h]{cursor:pointer}
 </div>
 <div class="toast" id="toast" role="status"></div>
 <div class="intro" id="intro" aria-hidden="true"><i class="pn pt"></i><i class="pn pb"></i><div class="intro-c"><div class="intro-w"><span>瓦</span><span>研</span><span>社</span></div><i class="intro-l"></i><div class="intro-s">VALORANT MOBILE</div></div></div>
+<div class="mx" id="mx" aria-hidden="true"></div>
 <div class="curtain" id="curtain" aria-hidden="true"><i class="c1"></i><i class="c2"></i></div>
 <script>
 /* ==================================================================
@@ -828,6 +960,11 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HERO_IMAGES=['','',''];   // ← 首页三张轮播图（可选）：['assets/hero-1.jpg','assets/hero-2.jpg','assets/hero-3.jpg']
+
+/* 地图小地图（游戏里那种方形小地图）：填入图片地址即可显示，例如 {haven:'assets/minimap/haven.png'} */
+const MINIMAPS={ascent:'https://i.imgs.ovh/2026/11/22/b5389d65dfe7cb6d3b720e1d890c0343.png',bind:'https://i.imgs.ovh/2026/11/22/5b1f227bf8298a0bfa426b96a615393e.png',haven:'https://i.imgs.ovh/2026/11/22/292bc6ac30dc4426732e01b7837f392f.png',split:'https://i.imgs.ovh/2026/11/22/569a91c8f77d2aabbdaa15d9ff47925c.png',icebox:'https://i.imgs.ovh/2026/11/22/1c2ee35b23eb9b7f07b7e78d33e474f6.png',breeze:'https://i.imgs.ovh/2026/11/22/bfb8973ab20d65fbe913ee98b2f22332.png',fracture:'https://i.imgs.ovh/2026/11/22/6979390feb28085ed041ac3dee855331.png',pearl:'https://i.imgs.ovh/2026/11/22/dd3d6e7e8a2b54f828c3acb51659063e.png',lotus:'https://i.imgs.ovh/2026/11/22/dd212b9645d35559e19023f795e04276.png',sunset:'https://i.imgs.ovh/2026/11/22/0709468e175bc0e858fbee92caff28d3.png',abyss:'https://i.imgs.ovh/2026/11/22/e895b169466e0041e4a565591dcefdb3.png',tianshu:'https://i.imgs.ovh/2026/11/22/86fdc79a8464bc2f18e262c3f05ad7e5.png'};
+/* 小地图点位标注：x/y 为 0~1 的相对坐标，side 为 'atk'(进攻) 或 'def'(防守)。例如 {haven:[{n:'A 长廊',x:.22,y:.3,side:'atk'}]} */
+const MAP_CALLOUTS={};
 
 const CONFIG={
   API_BASE:'https://api.wayanshe.xyz', // ← 账号/短信后端（Cloudflare Pages，service_role 仅在服务端，前端不碰数据库）
@@ -998,8 +1135,15 @@ const mqHTML=(items,cls,sp=50,dir='l')=>{const g=Array(3).fill(items.map(t=>`<sp
 const shead=(n,en,title,more)=>`<div class="shead rv"><span class="pnum"><i>${n}</i></span><div><small>${en}</small><h2 class="spl">${S(title)}</h2></div>${more?`<a class="more" href="#/${more}">全部 ${ic('arrow')}</a>`:''}</div>`;
 const pageHead=o=>`<section class="ph"><div class="ph-bg" aria-hidden="true"><i class="glow"></i><div class="lay2"><i class="sh a"></i><i class="sh b"></i></div><b class="word">${o.word}</b></div><span class="cr tl"></span><div class="wrap ph-in">${kick(o.k1||'无畏契约手游',o.k2)}<h1 class="spl" style="--d:120ms">${S(o.title)}</h1><p class="sub"><i>${o.sub}</i></p>${o.nums?numsHTML(o.nums):''}</div></section>`;
 const footer=()=>`<footer class="foot"><span class="fw">瓦研社 · VALORANT MOBILE</span><p>本站专注《无畏契约》手游攻略，内容以手游为准，不适用于端游。瓦研社为玩家自发的攻略社区，非官方网站。游戏名称及相关商标归其各自权利人所有。</p></footer>`;
-const agentCard=a=>`<button class="ag tilt" data-open="agent:${a.id}" style="--c:${ROLES[a.role].c}" data-role="${a.role}"><span class="ag-l">${a.en[0]}</span><span class="ag-r">${a.role}</span><span class="ag-n"><b>${a.name}</b><em>${a.en}</em></span></button>`;
-const mapCard=m=>`<button class="mp tilt" data-open="map:${m.id}" style="--h:${m.h}">${m.img?`<span class="mp-ph" style="background-image:linear-gradient(0deg,rgba(6,6,10,.62),rgba(6,6,10,.18) 55%),url('${m.img}')"></span>`:''}<span class="mp-g">${m.en}</span><span class="mp-t">${m.sites}</span><span class="mp-i"><b>${m.cn}</b><em>${m.feat}</em></span></button>`;
+const agentCard=a=>`<button class="ag tilt" data-open="agent:${a.id}" style="--c:${ROLES[a.role].c}" data-role="${a.role}"><span class="ag-l">${a.en[0]}</span>${agImg(a,'ag-i')}<span class="ag-r">${a.role}</span><span class="ag-n"><b>${a.name}</b><em>${a.en}</em></span></button>`;
+/* 特工全身免抠图 */
+const AGIMG={jett:'https://game.gtimg.cn/images/val/wallpaper/thumbpic/JETT.png',raze:'https://game.gtimg.cn/images/val/wallpaper/thumbpic/RAZE.png',phoenix:'https://game.gtimg.cn/images/val/wallpaper/thumbpic/PHOENIX.png',sova:'https://game.gtimg.cn/images/val/wallpaper/thumbpic/SOVA.png',brimstone:'https://game.gtimg.cn/images/val/wallpaper/thumbpic/BRIMSTONE.png',viper:'https://game.gtimg.cn/images/val/wallpaper/thumbpic/VIPER.png',omen:'https://game.gtimg.cn/images/val/wallpaper/thumbpic/OMEN.png',sage:'https://game.gtimg.cn/images/val/wallpaper/thumbpic/SAGE.png',cypher:'https://game.gtimg.cn/images/val/wallpaper/thumbpic/CYPHER.png',killjoy:'https://game.gtimg.cn/images/val/wallpaper/thumbpic/KILLJOY.png'};
+const agImg=(a,c)=>AGIMG[a.id]?`<img class="${c}" src="${AGIMG[a.id]}" alt="${a.name}" loading="lazy" decoding="async" referrerpolicy="no-referrer" draggable="false" onerror="this.remove()">`:'';
+const HEROH=()=>Math.min(Math.round(innerHeight*.62),560);
+const REC_KEY='wys_recent_maps',recents=()=>ls.get(REC_KEY,[]);
+function pushRecent(id){const r=recents().filter(x=>x!==id);r.unshift(id);ls.set(REC_KEY,r.slice(0,5))}
+const bgOf=m=>m.img?`linear-gradient(0deg,rgba(6,6,10,.62),rgba(6,6,10,.18) 55%),url('${m.img}')`:`linear-gradient(135deg,hsl(${m.h} 62% 22%),#08080c 72%)`;
+const mapCard=m=>{const n=MAPS.indexOf(m)+1,last=recents()[0]===m.id;return `<button class="mp tilt" data-open="map:${m.id}" data-mid="${m.id}" style="--h:${m.h}">${m.img?`<span class="mp-ph" style="background-image:linear-gradient(0deg,rgba(6,6,10,.62),rgba(6,6,10,.18) 55%),url('${m.img}')"></span>`:''}<span class="mp-g">${m.en}</span><span class="mp-t">${m.sites}</span><span class="mp-n${last?' last':''}">${last?'上次看到':String(n).padStart(2,'0')}</span><span class="mp-i"><b>${m.cn}</b><em>${m.feat}</em><span class="mp-m"><i>攻 ${m.atk.length}</i><i class="d">守 ${m.def.length}</i><i class="r">阵容 ${m.rec.length}</i></span></span></button>`};
 const artCard=a=>`<button class="card ar tilt" data-open="article:${a.id}" style="--h:${a.h}" data-tag="${a.tag}"><div class="ar-c"><em>${a.tag}</em><span>${String(ARTICLES.indexOf(a)+1).padStart(2,'0')}</span></div><div class="ar-b"><h3>${a.title}</h3><p>${a.sum}</p><div class="meta"><span>${ic('clock')}${a.min} 分钟</span><span>${a.lv}</span>${dones().includes(a.id)?`<span class="done-tag">${ic('check')}已学习</span>`:''}</div></div></button>`;
 const itemCard=i=>`<button class="card it tilt" data-open="item:${i.id}"><div class="it-h"><span class="it-ic">${ic(i.ic)}</span><div><b>${i.n}</b><em>${i.en}</em></div></div><p>${i.d}</p><div class="tags">${i.tags.map(t=>`<span>${t}</span>`).join('')}</div></button>`;
 
@@ -1048,9 +1192,40 @@ const VIEWS={
   +`<div class="wrap" style="margin-top:28px"><div class="chips rv" data-tabs>${['道具','经济与购买'].map((t,i)=>`<button class="chip${i?'':' on'}" data-tab="${i}">${t}</button>`).join('')}</div><div class="panel on" data-p="0">${grp(UTILS)}</div><div class="panel" data-p="1">${grp(ECO)}</div>${footer()}</div>`;
  },
  maps(){
+  const rc=recents().map(id=>byId('map',id)).filter(Boolean);
+  const mrc=rc.length?`<div class="mrc rv"><small>继续上次</small>${rc.map((m,i)=>`<button class="${i?'':'first'}" data-open="map:${m.id}"><i>${m.cn}</i></button>`).join('')}</div>`:'';
   return pageHead({word:'MAPS',k2:'MAP BREAKDOWN',title:'地图解析',sub:'进攻与防守思路、关键点位与推荐阵容',nums:[[MAPS.length,'MAPS','地图'],[MAPS.length*3,'ATTACK','进攻思路'],[MAPS.length*3,'DEFENSE','防守思路']]})
   +mqHTML(MAPS.flatMap(m=>[m.cn,`<em>${m.en.toUpperCase()}</em>`]),'mq-red',56)
-  +`<div class="wrap" style="margin-top:30px"><div class="grid g-map" data-stagger>${MAPS.map(mapCard).join('')}</div>${footer()}</div>`;
+  +`<div class="wrap" style="margin-top:30px">${mrc}<div class="grid g-map" data-stagger>${MAPS.map(mapCard).join('')}</div>${footer()}</div>`;
+ },
+ mapd(id){
+  const m=byId('map',id),i=MAPS.indexOf(m),pv=MAPS[(i-1+MAPS.length)%MAPS.length],nx=MAPS[(i+1)%MAPS.length];
+  const ag=m.rec.map(x=>byId('agent',x)).filter(Boolean),img=MINIMAPS[m.id],co=MAP_CALLOUTS[m.id]||[];
+  const list=(arr,cls,en)=>`<div class="md-list" data-stagger>${arr.map((t,k)=>`<div class="md-t ${cls}"><span class="md-n">${String(k+1).padStart(2,'0')}</span><div><em>${en}</em><p>${t}</p></div></div>`).join('')}</div>`;
+  return `<div class="mdp">
+  <section class="mdp-hero" style="--h:${m.h};--vh:${innerHeight}px;height:${HEROH()}px"><div class="mdp-bg" style="background-image:${bgOf(m)}"></div><span class="mdp-word">${m.en}</span>
+   <button class="mdp-back" data-back aria-label="返回地图列表">${ic('arrow')}<span>全部地图</span></button>
+   <div class="mdp-t">${kick('无畏契约手游','MAP '+String(i+1).padStart(2,'0'))}<h1 class="spl">${S(m.cn)}</h1><p class="mdp-en">${m.en}</p>
+    <div class="mdp-tags">${[m.sites,'进攻 '+m.atk.length+' 条','防守 '+m.def.length+' 条','阵容 '+ag.length+' 位'].map((t,k)=>`<span style="--i:${k}"><i>${t}</i></span>`).join('')}</div></div>
+  </section>
+  <div class="wrap">
+   <nav class="chips mdn" data-spy>${[['ov','概览'],['mm','小地图'],['atk','进攻'],['def','防守'],['rec','阵容']].map((a,k)=>`<button class="chip${k?'':' on'}" data-mds="${a[0]}">${a[1]}</button>`).join('')}</nav>
+   <section class="mds" id="mds-ov" data-s="ov">${shead('01','OVERVIEW','地图概览')}
+    <div class="mdq rv"><p>${m.feat}</p></div>
+    <div class="mdf rv"><div><b>${m.sites.replace(/\s*·.*$/,'')}</b><small>包点</small></div><div><b>${m.atk.length}</b><small>进攻要点</small></div><div><b>${m.def.length}</b><small>防守要点</small></div><div><b>${ag.length}</b><small>推荐特工</small></div></div></section>
+   <section class="mds" id="mds-mm" data-s="mm">${shead('02','MINIMAP','小地图')}
+    <div class="mm rv"><div class="mm-frame">${'tl tr bl br'.split(' ').map(c=>`<i class="mm-c ${c}"></i>`).join('')}<i class="mm-grid"></i><i class="mm-scan"></i><span class="mm-n">N</span>
+     ${img?`<img class="mm-img" referrerpolicy="no-referrer" decoding="async" src="${esc(img)}" alt="${m.cn}小地图" draggable="false">`:`<div class="mm-ph">${ic('map')}<b>小地图预留位</b><span>放入游戏内的方形小地图<br>建议 1:1 PNG，透明底</span></div>`}
+     <div class="mm-pins" data-side="all">${co.map(p=>`<button class="mm-pin ${p.side||''}" style="--x:${p.x};--y:${p.y}"><i></i><span>${esc(p.n)}</span></button>`).join('')}</div></div>
+     <div class="mm-tools"><button class="chip on" data-mmside="all">全部</button><button class="chip" data-mmside="atk">进攻点位</button><button class="chip" data-mmside="def">防守点位</button></div>
+     <p class="mm-tip">${img?'点位标注可在 MAP_CALLOUTS 中按 0–1 坐标配置。':'接入：在 MINIMAPS 填入图片地址，MAP_CALLOUTS 按 0–1 坐标标注点位。'}</p></div></section>
+   <section class="mds" id="mds-atk" data-s="atk">${shead('03','ATTACK','进攻思路')}${list(m.atk,'atk','ATTACK · 进攻')}</section>
+   <section class="mds" id="mds-def" data-s="def">${shead('04','DEFENSE','防守思路')}${list(m.def,'def','DEFENSE · 防守')}</section>
+   <section class="mds" id="mds-rec" data-s="rec">${shead('05','LINEUP','推荐阵容')}
+    <div class="md-rec" data-stagger>${ag.map(a=>`<button class="md-ag" data-open="agent:${a.id}"><span>${a.en[0]}</span><div><b>${a.name}</b><em>${a.role}</em></div></button>`).join('')}</div></section>
+   <div class="mds">${favBtn('map:'+m.id)}</div>
+   <div class="md-pn rv"><button data-mapgo="${pv.id}"><small>‹ PREV</small><b>${pv.cn}</b></button><button class="nx" data-mapgo="${nx.id}"><small>NEXT ›</small><b>${nx.cn}</b></button></div>
+   ${footer()}</div></div>`;
  },
  tactics(){
   const d=dones().length;
@@ -1077,7 +1252,7 @@ const VIEWS={
 /* ---------------- 详情 ---------------- */
 const favBtn=(k,done)=>`<div class="acts2"><button class="fav${favs().includes(k)?' on':''}" data-fav="${k}">${ic('mark')}<span>${favs().includes(k)?'已收藏':'收藏'}</span></button>${done?`<button class="fav ok${dones().includes(done)?' on':''}" data-done="${done}">${ic('check')}<span>${dones().includes(done)?'已学习':'标记已学'}</span></button>`:''}</div>`;
 const DETAIL={
- agent(a){const r=ROLES[a.role];return `<div class="sh-hero" style="--c:${r.c}"><span class="sh-l">${a.en[0]}</span><div><span class="tagx">${a.role}</span><h3>${a.name}</h3><em>${a.en}</em></div></div>
+ agent(a){const r=ROLES[a.role];return `<div class="sh-hero" style="--c:${r.c}"><span class="sh-l">${a.en[0]}</span>${agImg(a,'sh-i')}<div><span class="tagx">${a.role}</span><h3>${a.name}</h3><em>${a.en}</em></div></div>
   <div class="sh-sec"><p class="lead">${a.desc}</p></div>
   <div class="sh-sec"><h4>技能一览</h4><ul class="skl">${a.sk.map(s=>`<li><kbd>${s[0]}</kbd><div><b>${s[1]}<small>${s[2]}</small></b><p>${s[3]}</p></div></li>`).join('')}</ul></div>
   <div class="sh-sec"><h4>上手建议</h4><p>${a.tip}</p></div>${favBtn('agent:'+a.id)}`},
@@ -1357,7 +1532,7 @@ const ROUTES=['home','agents','items','maps','tactics','me'];
 const NAV=[['home','首页','home'],['agents','特工','agent'],['items','道具','items'],['maps','地图','map'],['tactics','战术','route'],['me','我的','me']];
 const TITLES={home:'瓦研社 · 无畏契约手游攻略',agents:'特工技能 · 瓦研社',items:'道具教学 · 瓦研社',maps:'地图解析 · 瓦研社',tactics:'战术教学 · 瓦研社',me:'我的 · 瓦研社'};
 const rendered=new Set();let cur='';
-const dock=$('#dock');
+const dock=$('#dock'),HTMLEL=document.documentElement;
 dock.innerHTML='<i class="lens" id="lens"></i>'+NAV.map(n=>`<a href="#/${n[0]}" data-nav="${n[0]}" aria-label="${n[1]}">${ic(n[2])}<span>${n[1]}</span></a>`).join('');
 /* 去掉 <a href>：任何浏览器长按都不会出现「后台打开 / 新窗口打开 / 复制链接」菜单 */
 function unlink(root){
@@ -1369,7 +1544,23 @@ new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(n=>n.nodeType===1&&u
 document.addEventListener('contextmenu',e=>{if(!(e.target.closest&&e.target.closest('input,textarea')))e.preventDefault()});
 document.addEventListener('dragstart',e=>e.preventDefault());
 const lens=$('#lens');
-function moveLens(anim){const a=$('a.on',dock);if(!a)return;lens.classList.toggle('mv',!!anim);lens.style.width=a.offsetWidth+'px';lens.style.transform=`translateX(${a.offsetLeft-7}px)`}
+let lensX=null,lensA=null;
+function moveLens(anim){
+  const a=$('a.on',dock);if(!a)return;const x=a.offsetLeft-7;lens.style.width=a.offsetWidth+'px';let x0=lensX;
+  if(lensA){try{x0=new DOMMatrix(getComputedStyle(lens).transform).m41}catch(e){}lensA.cancel();lensA=null}
+  lens.style.transform=`translateX(${x}px)`;
+  if(anim&&x0!==null&&Math.abs(x-x0)>2&&lens.animate&&!RM){
+    const d=x-x0,dir=Math.sign(d),st=1+Math.min(.9,Math.abs(d)/130);
+    lensA=lens.animate([
+      {transform:`translateX(${x0}px) scaleX(1) skewX(0deg)`,offset:0,easing:'cubic-bezier(.5,0,.15,1)'},
+      {transform:`translateX(${x0+d*.46}px) scaleX(${st}) skewX(${-dir*9}deg)`,offset:.4,easing:'cubic-bezier(.2,.8,.3,1)'},
+      {transform:`translateX(${x+dir*5}px) scaleX(.94) skewX(${dir*3}deg)`,offset:.76,easing:'ease-out'},
+      {transform:`translateX(${x}px) scaleX(1) skewX(0deg)`,offset:1}],{duration:580,easing:'linear'});
+    const me=lensA;me.onfinish=me.oncancel=()=>{if(lensA===me)lensA=null};
+    if(!HTMLEL.classList.contains('srch'))dock.animate([{transform:'translateX(-50%) scale(1)'},{transform:'translateX(-50%) scale(1.03,.97)',offset:.34},{transform:'translateX(-50%) scale(.995,1.005)',offset:.7},{transform:'translateX(-50%) scale(1)'}],{duration:560,easing:'ease-out'});
+  }
+  lensX=x;
+}
 function setNav(n,anim){$$('a[data-nav]',dock).forEach(a=>{const on=a.dataset.nav===n;a.classList.toggle('on',on);on?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current')});moveLens(anim)}
 
 /* 滚动入场：观察 .rv/.spl/.kick/.sub/.nums，进入视口时加 .in，数字滚动 */
@@ -1465,40 +1656,110 @@ function frame(t){
   }
 }
 
+let ARG='',HOLD=false;
 function mountView(n){
-  const el=$(`.view[data-view="${n}"]`);el.innerHTML=VIEWS[n]();rendered.add(n);
+  const el=$(`.view[data-view="${n}"]`);el.classList.remove('go','noanim');el.innerHTML=VIEWS[n](ARG);rendered.add(n);
   reveal(el);initMQ(el);initPills(el);PX=$$('.lay2',el).map(e=>({e,v:.28,s:''}));if(n==='home')initHero(el);else H=null;
+  if(n==='mapd')initMapd(el);
 }
-function setView(n){
+function setView(n,arg){
   $$('.view').forEach(v=>v.classList.toggle('on',v.dataset.view===n));
-  const prev=cur;cur=n;document.title=TITLES[n];
+  const prev=cur;cur=n;ARG=arg||'';
+  document.title=n==='mapd'?byId('map',ARG).cn+' · 瓦研社':TITLES[n];
   window.scrollTo(0,0);lastY=0;py=-1;
-  mountView(n);setNav(n,!!prev);
+  mountView(n);setNav(n==='mapd'?'maps':n,!!prev);
+  if(n==='mapd'&&!HOLD)$('.view[data-view="mapd"]').classList.add('go');
+}
+/* 地图详情页：区块导航（滚动联动高亮） */
+let spyLock=0,spyIO=null;
+function setSpy(id){const nav=$('.view.on .mdn');if(!nav)return;let on=null;$$('.chip',nav).forEach(c=>{const o=c.dataset.mds===id;c.classList.toggle('on',o);if(o)on=c});pillTo(nav,true);if(on)nav.scrollTo({left:on.offsetLeft-nav.clientWidth/2+on.offsetWidth/2,behavior:'smooth'})}
+function spyGo(id){const sec=$('#mds-'+id);if(!sec)return;spyLock=performance.now()+950;setSpy(id);window.scrollTo({top:sec.getBoundingClientRect().top+scrollY-116,behavior:'smooth'})}
+function initMapd(el){
+  pushRecent(ARG);if(spyIO)spyIO.disconnect();
+  spyIO=new IntersectionObserver(es=>{if(performance.now()<spyLock)return;es.forEach(e=>{if(e.isIntersecting)setSpy(e.target.dataset.s)})},{rootMargin:'-28% 0px -62% 0px'});
+  $$('.mds[data-s]',el).forEach(x=>spyIO.observe(x));
 }
 /* 转场幕布：红色斜切扫屏（盖住 → 换页 → 揭开） */
-const curtain=$('#curtain');let busy=false,pending=null;
-const EI='cubic-bezier(.65,0,.35,1)',EO='cubic-bezier(.22,1,.36,1)',K=x=>`translateX(${x}%) skewX(-14deg)`;
+const curtain=$('#curtain');let busy=false,pending=null,OPENRECT=null;
+const EI='cubic-bezier(.65,0,.35,1)',EO='cubic-bezier(.22,1,.36,1)',EX='cubic-bezier(.76,0,.24,1)',K=x=>`translateX(${x}%) skewX(-14deg)`;
+
+function after(){busy=false;if(pending&&(pending.n!==cur||pending.arg!==ARG)){const p=pending;pending=null;go(p)}else pending=null}
 async function runCurtain(n){
   busy=true;curtain.style.visibility='visible';setNav(n,true);
-  const[a,b]=curtain.children;
-  const i1=a.animate([{transform:K(-125)},{transform:K(0)}],{duration:270,easing:EI,fill:'forwards'});
-  const i2=b.animate([{transform:K(-125)},{transform:K(0)}],{duration:270,delay:40,easing:EI,fill:'forwards'});
-  await i2.finished;
+  const[a,b]=curtain.children,IN=260,HD=170,OUT=440;
+  const mk=(el,dl,hold)=>el.animate([{transform:K(-125),offset:0,easing:EI},{transform:K(0),offset:IN/(IN+hold+OUT)},{transform:K(0),offset:(IN+hold)/(IN+hold+OUT),easing:EO},{transform:K(125),offset:1}],{duration:IN+hold+OUT,delay:dl,fill:'both'});
+  const A=[mk(a,0,HD+60),mk(b,40,HD)];
+  await wait(IN+30);await new Promise(r=>requestAnimationFrame(r));
   setView(n);
-  const o2=b.animate([{transform:K(0)},{transform:K(125)}],{duration:430,easing:EO,fill:'forwards'});
-  const o1=a.animate([{transform:K(0)},{transform:K(125)}],{duration:460,delay:60,easing:EO,fill:'forwards'});
-  await o1.finished;
-  [i1,i2,o1,o2].forEach(x=>x.cancel());curtain.style.visibility='hidden';busy=false;
-  if(pending&&pending!==cur){const p=pending;pending=null;runCurtain(p)}else pending=null;
+  await Promise.all(A.map(x=>x.finished));
+  A.forEach(x=>x.cancel());curtain.style.visibility='hidden';after();
+}
+/* 地图详情：卡片展开 → 标题卡 → 收缩成头图（与 dock 幕布完全不同的转场） */
+const mx=$('#mx');
+function mxHTML(m){const p=String(MAPS.indexOf(m)+1).padStart(2,'0');return `<div class="mx-c"><div class="mx-bg" style="background-image:${bgOf(m)}"></div><i class="mx-g"></i><i class="mx-sl a"></i><i class="mx-sl b"></i><div class="mx-hud"><span>MAP ${p}</span><span>${m.sites}</span><i class="l1"></i><i class="l2"></i></div><div class="mx-t"><small>无畏契约手游 · MAP ${p}</small><h2>${S(m.cn)}</h2><em>${m.en}</em></div><i class="mx-flash"></i></div>`}
+const insetOf=(r,vw,vh)=>r?`inset(${r.top}px ${vw-r.right}px ${vh-r.bottom}px ${r.left}px)`:`inset(${vh/2-1}px 0px ${vh/2-1}px 0px)`;
+const mxClean=()=>{mx.getAnimations({subtree:true}).forEach(a=>a.cancel());mx.classList.remove('on');mx.innerHTML=''};
+async function runExpand(id){
+  busy=true;const m=byId('map',id),vw=innerWidth,vh=innerHeight,r=OPENRECT;OPENRECT=null;
+  mx.innerHTML=mxHTML(m);mx.style.setProperty('--vh',vh+'px');mx.classList.add('on');
+  const q=x=>$(x,mx),c=q('.mx-c'),sl=$$('.mx-sl',mx);
+  const o={fill:'both'};
+  const grow=c.animate([{clipPath:insetOf(r,vw,vh)},{clipPath:'inset(0px 0px 0px 0px)'}],{...o,duration:640,easing:EX});
+  q('.mx-bg').animate([{transform:`scale(${r?1.32:1.14})`},{transform:'scale(1)'}],{...o,duration:1000,easing:EO});
+  q('.mx-hud').animate([{opacity:0},{opacity:1}],{...o,duration:420,delay:360});
+  sl[0].animate([{transform:K(-130)},{transform:K(430)}],{...o,duration:700,delay:150,easing:'cubic-bezier(.55,0,.2,1)'});
+  sl[1].animate([{transform:K(-130)},{transform:K(1100)}],{...o,duration:700,delay:230,easing:'cubic-bezier(.55,0,.2,1)'});
+  $$('.mx-t .c',mx).forEach((e,k)=>e.animate([{transform:'translateY(115%) skewY(9deg)'},{transform:'none'}],{...o,duration:780,delay:340+k*55,easing:EO}));
+  $$('.mx-t small,.mx-t em',mx).forEach((e,k)=>e.animate([{opacity:0,transform:'translateX(-24px)'},{opacity:1,transform:'none'}],{...o,duration:600,delay:520+k*90,easing:EO}));
+  await grow.finished;
+  HOLD=true;setView('mapd',id);HOLD=false;
+  await wait(380);
+  const heroH=HEROH(),view=$('.view[data-view="mapd"]');
+  q('.mx-flash').animate([{opacity:0},{opacity:.22,offset:.3},{opacity:0}],{...o,duration:420});
+  q('.mx-t').animate([{opacity:1,transform:'none'},{opacity:0,transform:'translateY(-30px)'}],{...o,duration:380,easing:EO});
+  q('.mx-hud').animate([{opacity:1},{opacity:0}],{...o,duration:300});
+  const shrink=c.animate([{clipPath:'inset(0px 0px 0px 0px)'},{clipPath:`inset(0px 0px ${vh-heroH}px 0px)`}],{...o,duration:680,easing:EX});
+  await wait(430);view.classList.add('go');
+  await shrink.finished;
+  await c.animate([{opacity:1},{opacity:0}],{...o,duration:220}).finished;
+  mxClean();after();
+}
+async function runCollapse(id){
+  busy=true;const m=byId('map',id),vw=innerWidth,vh=innerHeight,heroH=HEROH();
+  mx.innerHTML=mxHTML(m);mx.style.setProperty('--vh',vh+'px');mx.classList.add('on');
+  const q=x=>$(x,mx),c=q('.mx-c'),o={fill:'both'};
+  $$('.mx-t .c',mx).forEach(e=>e.style.transform='none');q('.mx-hud').style.opacity=1;
+  const up=c.animate([{clipPath:`inset(0px 0px ${vh-heroH}px 0px)`},{clipPath:'inset(0px 0px 0px 0px)'}],{...o,duration:380,easing:EX});
+  q('.mx-t').animate([{opacity:0,transform:'translateY(30px)'},{opacity:1,transform:'none'}],{...o,duration:380,easing:EO});
+  await up.finished;
+  setView('maps');
+  const card=$(`.mp[data-mid="${id}"]`);let r=null;
+  if(card){card.classList.add('in');const b=card.getBoundingClientRect();window.scrollTo(0,Math.max(0,b.top+scrollY-(vh-b.height)/2));r=card.getBoundingClientRect()}
+  q('.mx-t').animate([{opacity:1},{opacity:0}],{...o,duration:240});q('.mx-hud').animate([{opacity:1},{opacity:0}],{...o,duration:240});
+  q('.mx-flash').animate([{opacity:0},{opacity:.2,offset:.3},{opacity:0}],{...o,duration:420});
+  q('.mx-bg').animate([{transform:'scale(1)'},{transform:'scale(1.2)'}],{...o,duration:640,easing:EX});
+  const shr=c.animate([{clipPath:'inset(0px 0px 0px 0px)'},{clipPath:insetOf(r,vw,vh)}],{...o,duration:640,easing:EX});
+  await shr.finished;
+  await c.animate([{opacity:1},{opacity:0}],{...o,duration:180}).finished;
+  mxClean();after();
+  if(card&&card.animate)card.animate([{filter:'brightness(1.6)'},{filter:'none'}],{duration:500,easing:'ease-out'});
+}
+function parseRoute(){
+  let h=(location.hash.replace(/^#\/?/,'')||'home').split('?')[0];const m=h.match(/^map\/([\w-]+)$/);
+  if(m&&byId('map',m[1]))return{n:'mapd',arg:m[1]};if(!ROUTES.includes(h))h='home';return{n:h,arg:''};
+}
+function go(r){
+  if(RM||!Element.prototype.animate){setView(r.n,r.arg);return}
+  if(r.n==='mapd')runExpand(r.arg);
+  else if(cur==='mapd'&&r.n==='maps')runCollapse(ARG);
+  else runCurtain(r.n);
 }
 function route(){
-  let n=(location.hash.replace(/^#\/?/,'')||'home').split('?')[0];if(!ROUTES.includes(n))n='home';
-  closeSheet();closeSearch();
-  if(!cur){setView(n);return}
-  if(busy){pending=n;return}
-  if(n===cur)return;
-  if(RM||!Element.prototype.animate){setView(n);return}
-  runCurtain(n);
+  const r=parseRoute();closeSheet();closeSearch();
+  if(!cur){setView(r.n,r.arg);return}
+  if(busy){pending=r;return}
+  if(r.n===cur&&r.arg===ARG)return;
+  go(r);
 }
 window.addEventListener('hashchange',route);
 
@@ -1544,10 +1805,16 @@ document.addEventListener('click',e=>{
     setTimeout(()=>{navA.classList.remove('pressing');delete navA.dataset.busy;if(location.hash!==target)location.hash=target},140);
     return;
   }
-  const t=e.target.closest('[data-open],[data-close],[data-login],[data-logout],[data-fav],[data-done],[data-go],[data-astep],[data-getcode],[data-doc],[data-tab-auth],[data-eye],[data-forgot],[data-oauth],.chip');
+  const t=e.target.closest('[data-open],[data-close],[data-login],[data-logout],[data-fav],[data-done],[data-go],[data-astep],[data-getcode],[data-doc],[data-tab-auth],[data-eye],[data-forgot],[data-oauth],[data-mds],[data-mmside],[data-mapgo],[data-back],.chip');
   if(!t)return;
   if(t.matches('[data-close]'))return closeSheet();
-  if(t.dataset.open){closeSearch();return openDetail(t.dataset.open)}
+  if(t.dataset.mds){spyGo(t.dataset.mds);return}
+  if(t.dataset.mmside){const b=t.parentNode;$$('.chip',b).forEach(c=>c.classList.toggle('on',c===t));pillTo(b,true);$('.mm-pins').dataset.side=t.dataset.mmside;return}
+  if(t.hasAttribute('data-back')){location.hash='#/maps';return}
+  if(t.dataset.mapgo){OPENRECT=null;location.hash='#/map/'+t.dataset.mapgo;return}
+  if(t.dataset.open){
+    if(t.dataset.open.startsWith('map:')){const id=t.dataset.open.slice(4),c=t.closest('.mp');OPENRECT=c?c.getBoundingClientRect():null;closeSearch();location.hash='#/map/'+id;return}
+    closeSearch();return openDetail(t.dataset.open)}
   if(t.matches('[data-login]'))return openLogin();
   if(t.matches('[data-logout]')){Auth.logout().then(()=>{toast('已退出登录');location.hash='#/home'});return}
   if(t.dataset.go){location.hash='#/'+t.dataset.go;return}
@@ -1575,10 +1842,11 @@ document.addEventListener('click',e=>{
   }
 });
 document.addEventListener('submit',e=>{const f=e.target.closest('form[data-auth]');if(f){e.preventDefault();submitAuth(f)}});
-document.addEventListener('input',e=>{if(e.target.id==='q')doSearch(e.target.value)});
+let sqRaf=0;document.addEventListener('input',e=>{if(e.target.id==='q'){const v=e.target.value;cancelAnimationFrame(sqRaf);sqRaf=requestAnimationFrame(()=>doSearch(v))}});
+document.addEventListener('touchmove',e=>{if(sOpen&&!(e.target.closest&&e.target.closest('.spi')))e.preventDefault()},{passive:false});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSheet();closeSearch()}if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.h)e.target.click()});
 /* ---------------- 搜索：顶栏变形为搜索框 ---------------- */
-const sbar=$('#sbar'),qEl=$('#q'),HTMLEL=document.documentElement;let sOpen=false;
+const sbar=$('#sbar'),qEl=$('#q');let sOpen=false;
 $('#sbarIc').innerHTML=ic('search');$('#sclear').innerHTML=ic('close');
 function sbarGeom(){const b=$('#searchBtn');if(!b||!sbar)return;const br=b.getBoundingClientRect(),sr=sbar.getBoundingClientRect();if(!br.width||!sr.width)return;sbar.style.setProperty('--sl',Math.max(0,br.left-sr.left)+'px');sbar.style.setProperty('--sr',Math.max(0,sr.right-br.right)+'px')}
 function spanelHTML(){
@@ -1588,11 +1856,11 @@ function spanelHTML(){
 function openSearch(){
   if(sOpen)return;sOpen=true;closeSheet();sbarGeom();
   $('#spi').innerHTML=spanelHTML();qEl.value='';sbar.classList.remove('has');
-  HTMLEL.classList.add('srch','lock');$('#spanel').setAttribute('aria-hidden','false');
+  HTMLEL.classList.add('srch');$('#spanel').setAttribute('aria-hidden','false');
   try{qEl.focus({preventScroll:true})}catch(e){qEl.focus()}
 }
 function closeSearch(){
-  if(!sOpen)return;sOpen=false;HTMLEL.classList.remove('srch','lock');$('#spanel').setAttribute('aria-hidden','true');qEl.blur();
+  if(!sOpen)return;sOpen=false;HTMLEL.classList.remove('srch');$('#spanel').setAttribute('aria-hidden','true');qEl.blur();
 }
 $('#searchBtn').addEventListener('click',openSearch);
 $('#scancel').addEventListener('click',closeSearch);
@@ -1643,6 +1911,41 @@ Auth.handleCallback().then(r=>{if(r&&r.needBind)openBind();else if(r&&r.user)toa
 window.WYS={Auth,CONFIG,openLogin,toast,data:{AGENTS,MAPS,UTILS,ECO,ARTICLES}};
 })();
 
+
+/* ---------------- 超椭圆（iOS 连续曲率）：原生 corner-shape 优先，否则 clip-path + 描边环 ---------------- */
+const SQ_SEL='.ib,.login-btn,.tile-ic,.x,.oa,.oa-i,.atip,.getc,.sbar-c,.fld,.mdp-back';
+const SQ_NATIVE=(()=>{try{return CSS.supports('corner-shape','squircle')}catch(e){return false}})();
+function sqPath(w,h,r,o,sm){
+  r=Math.min(r,w/2,h/2);if(r<=0)return `M${o} ${o}h${w}v${h}h${-w}z`;let s=sm,p=Math.min((1+s)*r,Math.min(w,h)/2);if(p<(1+s)*r)s=p/r-1;
+  const R=Math.PI/180,arcM=90*(1-s),arcL=Math.sin(arcM/2*R)*r*Math.SQRT2,al=(90-arcM)/2,p34=r*Math.tan(al/2*R),be=45*s,c=p34*Math.cos(be*R),d=c*Math.tan(be*R);
+  const b=(p-arcL-c-d)/3,a=2*b,f=n=>+n.toFixed(2),q=(...v)=>v.map(f).join(' ');
+  return `M${q(o+w-p,o)}c${q(a,0,a+b,0,a+b+c,d)}a${q(r,r)} 0 0 1 ${q(arcL,arcL)}c${q(d,c,d,b+c,d,a+b+c)}L${q(o+w,o+h-p)}c${q(0,a,0,a+b,-d,a+b+c)}a${q(r,r)} 0 0 1 ${q(-arcL,arcL)}c${q(-c,d,-(b+c),d,-(a+b+c),d)}L${q(o+p,o+h)}c${q(-a,0,-(a+b),0,-(a+b+c),-d)}a${q(r,r)} 0 0 1 ${q(-arcL,-arcL)}c${q(-d,-c,-d,-(b+c),-d,-(a+b+c))}L${q(o,o+p)}c${q(0,-a,0,-(a+b),d,-(a+b+c))}a${q(r,r)} 0 0 1 ${q(arcL,-arcL)}c${q(c,-d,b+c,-d,a+b+c,-d)}z`;
+}
+function sqDraw(el){
+  if(SQ_NATIVE)return;
+  if(!el.dataset.sq){
+    const cs=getComputedStyle(el),r=parseFloat(cs.borderTopLeftRadius)||0,w0=el.offsetWidth,h0=el.offsetHeight;
+    if(!r||!w0||r>=Math.min(w0,h0)/2-.5)return;
+    el.dataset.sq='1';el.dataset.r=r;el.dataset.bw=parseFloat(cs.borderTopWidth)||0;el.dataset.bc=cs.borderTopColor;
+    if(cs.position==='static')el.classList.add('sqp');el.classList.add('sq','sqf');
+    if(typeof ResizeObserver!=='undefined'){(sqRO||(sqRO=new ResizeObserver(es=>es.forEach(e=>sqDraw(e.target)))))}sqRO&&sqRO.observe(el);
+  }
+  const w=el.offsetWidth,h=el.offsetHeight;if(!w||!h)return;const r=+el.dataset.r,bw=+el.dataset.bw;
+  const key=w+'x'+h;
+  el.style.clipPath=`path('${sqPath(w,h,r,0,.6)}')`;
+  let ring=el.querySelector(':scope>.sqr');
+  if(bw>0){
+    if(!ring){ring=document.createElement('i');ring.className='sqr';el.appendChild(ring)}
+    if(ring.dataset.k!==key){ring.dataset.k=key;ring.style.cssText=`left:${-bw}px;top:${-bw}px;width:${w}px;height:${h}px;background:${el.dataset.bc};clip-path:path(evenodd,'${sqPath(w,h,r,0,.6)}${sqPath(w-2*bw,h-2*bw,Math.max(0,r-bw),bw,.6)}')`}
+  }
+}
+let sqRO=null,sqT=0;
+function sqScan(root){(root||document).querySelectorAll(SQ_SEL).forEach(sqDraw)}
+sqScan();
+if(!SQ_NATIVE){
+  new MutationObserver(()=>{if(sqT)return;sqT=requestAnimationFrame(()=>{sqT=0;sqScan();document.querySelectorAll('.sq[data-sq]').forEach(sqDraw)})}).observe(document.body,{childList:true,subtree:true});
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>sqScan());
+}
 </script>
 </body>
 </html>
