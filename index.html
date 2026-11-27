@@ -2547,6 +2547,7 @@ if(!SQ_NATIVE){
   var lastFrame = 0, rafId = 0, running = false, inited = false;
   var painted = { row: -1, frame: -1 };
   var transformDirty = true;
+  var userPlaced = false;
   var hidden = lsGet('wys_pet_hidden') === '1';
 
   function viewW() { return document.documentElement.clientWidth || window.innerWidth || 0; }
@@ -2620,7 +2621,10 @@ if(!SQ_NATIVE){
     if (!pos.x && !pos.y) home();
     clampPos(); transformDirty = true; applyTransform();
   }
-  function savePos() { lsSet('wys_pet_pos', JSON.stringify({ x: Math.round(pos.x), y: Math.round(pos.y) })); }
+  function savePos() {
+    userPlaced = true;
+    lsSet('wys_pet_pos', JSON.stringify({ x: Math.round(pos.x), y: Math.round(pos.y) }));
+  }
 
   /* ---------- 状态机 ---------- */
   function setState(name, force) {
@@ -2767,6 +2771,7 @@ if(!SQ_NATIVE){
     clearTimeout(longTimer);
     try { pet.releasePointerCapture(e.pointerId); } catch (err) {}
     if (wasMoved) {
+      userPlaced = true;
       if (reduced) { savePos(); return; }
       var v = sampleVelocity();
       vel.x = v.x; vel.y = v.y;
@@ -2864,6 +2869,12 @@ if(!SQ_NATIVE){
     scale = pickScale();
     applyScale();
     home(); restorePos();
+    /* 首屏视口尚未稳定时可能算错位置，用户没动过就在 1.2s / 3s 自我校正 */
+    [1200, 3000].forEach(function (ms) {
+      setTimeout(function () {
+        if (!userPlaced && !lsGet('wys_pet_pos') && !dragging && !airborne) home();
+      }, ms);
+    });
     layer.style.display = hidden ? 'none' : '';
     back.classList.toggle('on', hidden);
     paint(0, 0);
