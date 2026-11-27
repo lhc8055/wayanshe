@@ -1872,18 +1872,19 @@ function dkMove(i,anim){
   const x1=tabX(i);
   if(!anim||RM||!dpill.animate||!db[0].offsetWidth){dkPlace(i);return}
   const moving=dAnims.length>0,from=lastFrom();
-  const xa=moving?curX(dgb[0]):from,xb=moving?curX(dgb[1]):from,xp=moving?curX(dpill):from,po=moving?+getComputedStyle(dpill).opacity:1,go=moving?+getComputedStyle(dgoo).opacity:0;
+  const xa=moving?curX(dgb[0]):from,xb=moving?curX(dgb[1]):from,po=moving?+getComputedStyle(dpill).opacity:1,go=moving?+getComputedStyle(dgoo).opacity:0;
   dkStop();const tok=++dTok;
-  const dist=Math.max(Math.abs(x1-xa),Math.abs(x1-xb)),D=460+Math.min(dist/80,4)*60;
-  /* 一整段连续转场（不再“淡出→移动→淡入”三步）：胶囊随尾球慢慢走，只在中段变淡；融球在前 22% 渐显、后 30% 渐隐，三层相互交叠，没有任何一个瞬间是突变 */
-  const lead=dgb[0].animate([{transform:tx(xa)+' scaleX(1)'},{transform:tx(xa+(x1-xa)*.4)+' scaleX(1.16)',offset:.4},{transform:tx(x1)+' scaleX(1)'}],{duration:D*.82,easing:'cubic-bezier(.3,.8,.3,1)',fill:'both'});
-  const trail=dgb[1].animate([{transform:tx(xb)},{transform:tx(x1)}],{duration:D,delay:60,easing:'cubic-bezier(.45,0,.2,1)',fill:'both'});
-  const P=dpill.animate([{transform:tx(xp),opacity:po},{opacity:.12,offset:.3},{opacity:.12,offset:.6},{transform:tx(x1),opacity:1}],{duration:D+60,easing:'cubic-bezier(.4,0,.2,1)',fill:'both'});
-  const G=dgoo.animate([{opacity:go},{opacity:GOO_A,offset:.22},{opacity:GOO_A,offset:.7},{opacity:0}],{duration:D+60,easing:'linear',fill:'both'});
-  dAnims=[lead,trail,P,G];
-  Promise.all([lead.finished,trail.finished,P.finished,G.finished]).then(()=>{
+  const dist=Math.max(Math.abs(x1-xa),Math.abs(x1-xb)),D=380+Math.min(dist/80,4)*55;
+  const mv=(el,x0,dur,delay,ease)=>el.animate([{transform:tx(x0)},{transform:tx(x1)}],{duration:dur,delay,easing:ease,fill:'both'});
+  const A=mv(dgb[0],xa,D*.78,0,'cubic-bezier(.2,.9,.25,1)'),B=mv(dgb[1],xb,D,50,'cubic-bezier(.55,0,.2,1)');
+  const f1=dgoo.animate([{opacity:go},{opacity:GOO_A}],{duration:90,fill:'forwards'}),f2=dpill.animate([{opacity:po},{opacity:0}],{duration:90,fill:'forwards'});
+  dAnims=[A,B,f1,f2];
+  Promise.all([A.finished,B.finished]).then(()=>{
     if(tok!==dTok)return;
-    dpill.style.transform=tx(x1);dkStop();dpill.style.opacity='';dgoo.style.opacity='0';
+    dpill.style.transform=tx(x1);
+    const g=dgoo.animate([{opacity:GOO_A},{opacity:0}],{duration:150,fill:'forwards'}),pl=dpill.animate([{opacity:0},{opacity:1}],{duration:150,fill:'forwards'});
+    dAnims.push(g,pl);
+    Promise.all([g.finished,pl.finished]).then(()=>{if(tok===dTok){dkStop();dpill.style.opacity='';dgoo.style.opacity='0'}}).catch(()=>{});
   }).catch(()=>{});
 }
 let prevIdx=-1;const lastFrom=()=>tabX(Math.max(0,prevIdx));
@@ -2453,7 +2454,7 @@ if(!SQ_NATIVE){
 <style>
 /* 幽影小猫 · 站内搭件（独立于主站样式，全部 wysPet 前缀） */
 #wysPetLayer{position:fixed;inset:0;z-index:45;pointer-events:none;overflow:hidden}
-#wysPetWrap{position:absolute;left:0;top:0;width:104px;height:113px;will-change:transform;backface-visibility:hidden}
+#wysPetWrap{position:absolute;left:0;top:0;width:88px;height:95px;will-change:transform;backface-visibility:hidden}
 #wysPetScale{position:absolute;left:0;top:0;width:192px;height:208px;transform-origin:0 0}
 #wysPet{position:absolute;left:0;top:0;width:192px;height:208px;background-image:url("spritesheet.webp");background-repeat:no-repeat;background-size:1536px 1872px;background-position:0 0;image-rendering:pixelated;image-rendering:crisp-edges;pointer-events:auto;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;opacity:0;transition:opacity .35s ease}
 #wysPet.ready{opacity:1}
@@ -2465,15 +2466,20 @@ if(!SQ_NATIVE){
 #wysPetSay{position:absolute;left:50%;bottom:100%;transform:translate(-50%,4px);margin-bottom:4px;padding:5px 9px;border-radius:9px;background:rgba(14,14,20,.94);border:1px solid rgba(232,198,128,.32);color:#f0e6d2;font-size:11px;line-height:1.25;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .16s ease,transform .16s ease}
 #wysPetSay.on{opacity:1;transform:translate(-50%,-2px)}
 #wysPetSay:after{content:"";position:absolute;left:50%;bottom:-4px;width:7px;height:7px;transform:translateX(-50%) rotate(45deg);background:rgba(14,14,20,.94);border-right:1px solid rgba(232,198,128,.32);border-bottom:1px solid rgba(232,198,128,.32)}
-#wysPetMenu{position:fixed;z-index:210;display:none;min-width:104px;padding:5px;border-radius:11px;background:rgba(14,14,20,.97);border:1px solid rgba(255,255,255,.16);box-shadow:0 14px 34px rgba(0,0,0,.6);flex-direction:column;gap:3px;backdrop-filter:blur(8px);transform-origin:50% 100%}
-#wysPetMenu.on{display:flex;animation:wysPetMenuIn .14s ease-out}
-@keyframes wysPetMenuIn{from{opacity:0;transform:translateY(6px) scale(.96)}to{opacity:1;transform:none}}
-#wysPetMenu button{appearance:none;border:1px solid transparent;background:transparent;color:#d8d8e2;padding:7px 10px;border-radius:7px;font-size:12px;text-align:left;cursor:pointer;font-family:inherit;white-space:nowrap}
+#wysPetShade{position:fixed;inset:0;z-index:44;background:rgba(4,4,8,.5);opacity:0;pointer-events:none;transition:opacity .34s ease}
+#wysPetShade.on{opacity:1;pointer-events:auto}
+#wysPetMenuAnchor{position:fixed;left:0;top:0;z-index:211;transform:translate(-50%,-100%);pointer-events:none}
+#wysPetMenu{position:relative;width:42px;height:42px;border-radius:999px;overflow:hidden;opacity:0;visibility:hidden;background:rgba(14,14,20,.97);border:1px solid rgba(255,255,255,.15);box-shadow:0 18px 44px rgba(0,0,0,.62);backdrop-filter:blur(12px);pointer-events:auto;transition:width .46s cubic-bezier(.32,.72,0,1),height .46s cubic-bezier(.32,.72,0,1),border-radius .46s cubic-bezier(.32,.72,0,1),opacity .16s ease,visibility .16s}
+#wysPetMenu.show{opacity:1;visibility:visible}
+#wysPetMenu.open{width:148px;height:158px;border-radius:18px}
+#wysPetMenuList{position:absolute;inset:6px;display:flex;flex-direction:column;gap:3px;opacity:0;transform:translateY(10px) scale(.97);filter:blur(7px);transition:opacity .3s ease,transform .3s ease,filter .3s ease}
+#wysPetMenu.open #wysPetMenuList{opacity:1;transform:none;filter:none;transition-delay:.1s}
+#wysPetMenu button{appearance:none;border:1px solid transparent;background:transparent;color:#d8d8e2;height:34px;padding:0 10px;border-radius:9px;font-size:12px;text-align:left;cursor:pointer;font-family:inherit;white-space:nowrap;flex:0 0 auto}
 #wysPetMenu button:hover,#wysPetMenu button:active{background:rgba(255,255,255,.09)}
 #wysPetBack{position:fixed;right:12px;bottom:calc(86px + var(--safeB,0px));z-index:46;display:none;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:rgba(14,14,20,.8);border:1px solid rgba(232,198,128,.35);color:#e8c680;font-size:12px;cursor:pointer;pointer-events:auto;backdrop-filter:blur(6px);font-family:inherit}
 #wysPetBack.on{display:flex}
 @media (max-width:760px){#wysPetBack{bottom:calc(100px + var(--safeB,0px))}}
-@media (prefers-reduced-motion:reduce){#wysPetZzz.on{animation:none}#wysPet{transition:none}#wysPetMenu.on{animation:none}}
+@media (prefers-reduced-motion:reduce){#wysPetZzz.on{animation:none}#wysPet{transition:none}#wysPetMenu,#wysPetMenuList,#wysPetShade{transition:none}}
 </style>
 <script>
 /* 幽影小猫 · 站内搭件
@@ -2517,20 +2523,28 @@ if(!SQ_NATIVE){
       '<div id="wysPetZzz">z z</div>' +
       '<div id="wysPetSay"></div>' +
     '</div>';
+  var shade = document.createElement('div');
+  shade.id = 'wysPetShade';
+  var anchor = document.createElement('div');
+  anchor.id = 'wysPetMenuAnchor';
   var menu = document.createElement('div');
   menu.id = 'wysPetMenu';
   menu.innerHTML =
-    '<button data-act="jump">跳一下</button>' +
-    '<button data-act="wave">挥挥手</button>' +
-    '<button data-act="sleep">睡一会</button>' +
-    '<button data-act="hide">隐藏宠物</button>';
+    '<div id="wysPetMenuList">' +
+      '<button data-act="jump">跳一下</button>' +
+      '<button data-act="wave">挥挥手</button>' +
+      '<button data-act="sleep">睡一会</button>' +
+      '<button data-act="hide">隐藏宠物</button>' +
+    '</div>';
+  anchor.appendChild(menu);
   var back = document.createElement('button');
   back.id = 'wysPetBack'; back.type = 'button'; back.textContent = '召唤';
   back.setAttribute('aria-label', '显示宠物');
 
   function mount() {
     document.body.appendChild(layer);
-    document.body.appendChild(menu);
+    document.body.appendChild(shade);
+    document.body.appendChild(anchor);
     document.body.appendChild(back);
   }
 
@@ -2559,17 +2573,17 @@ if(!SQ_NATIVE){
     return (vv && vv.height) || document.documentElement.clientHeight || window.innerHeight || 0;
   }
   function isMobile() { return viewW() <= 760; }
-  /* 底部预留，避开移动端悬浮导航 */
-  function bottomReserve() { return (isMobile() ? 112 : 40); }
+  /* 底部预留：贴住 dock 上沿，比上一版更低 */
+  function bottomReserve() { return (isMobile() ? 92 : 58); }
   function petW() { return FRAME_W * scale; }
   function petH() { return FRAME_H * scale; }
   function maxX() { return Math.max(0, viewW() - petW() - 10); }
   function maxY() { return Math.max(0, viewH() - petH() - bottomReserve()); }
 
-  /* 目标显示宽度：桌面 104 / 手机 96，比上一版略大一点；跨设备一致 */
+  /* 目标显示宽度：桌面 88 / 手机 80，比上一版收小；跨设备一致 */
   function pickScale() {
     dpr = window.devicePixelRatio || 1;
-    return (isMobile() ? 96 : 104) / FRAME_W;
+    return (isMobile() ? 80 : 88) / FRAME_W;
   }
 
   function clampPos() {
@@ -2837,30 +2851,40 @@ if(!SQ_NATIVE){
   }
 
   /* ---------- 菜单：贴着宠物上方弹出，不遮住宠物、不被底部导航裁掉 ---------- */
+  /* 菜单：从宠物身上长出来，向上展开（77 的形变过渡） */
   function placeMenu() {
-    var mw = menu.offsetWidth || 116;
-    var mh = menu.offsetHeight || 140;
-    var left = pos.x + petW() / 2 - mw / 2;
-    left = Math.max(8, Math.min(viewW() - mw - 8, left));
-    var top = pos.y - mh - 12;                      // 优先放在宠物上方
-    if (top < 8) top = pos.y + petH() + 12;         // 上方没位置就放下方
-    var maxTop = viewH() - bottomReserve() - mh - 6;
-    if (top > maxTop) top = Math.max(8, maxTop);
-    menu.style.left = Math.round(left) + 'px';
-    menu.style.top = Math.round(top) + 'px';
+    var open_ = menuOpen;
+    var mw = open_ ? (menu.offsetWidth || 148) : 148;      // 按展开后的尺寸计算描点
+    var mh = open_ ? (menu.offsetHeight || 158) : 158;
+    var cx = pos.x + petW() / 2;
+    cx = Math.max(mw / 2 + 8, Math.min(viewW() - mw / 2 - 8, cx));
+    var up = pos.y + 10;                                    // 面板底边贴着宠物头顶（压在精灵留白上）
+    var down = pos.y + petH() + 2;
+    var flip = up - mh < 8 && viewH() - down > mh + 8;      // 头顶没空间就朝下长
+    anchor.style.left = Math.round(cx) + 'px';
+    anchor.style.top = Math.round(flip ? down : up) + 'px';
+    anchor.style.transform = flip ? 'translate(-50%,0)' : 'translate(-50%,-100%)';
   }
   function openMenu() {
     clearTimeout(longTimer);
     if (dragging) { dragging = false; pet.classList.remove('dragging'); }
     suppressTap = true;
-    menu.classList.add('on');
+    if (menuOpen) { placeMenu(); return; }
     menuOpen = true;
+    menu.classList.remove('open');
+    menu.classList.add('show');
     placeMenu();
+    shade.classList.add('on');
+    requestAnimationFrame(function () {
+      if (menuOpen) menu.classList.add('open');
+    });
   }
   function closeMenu() {
     if (!menuOpen) return;
     menuOpen = false;
-    menu.classList.remove('on');
+    menu.classList.remove('open');
+    shade.classList.remove('on');
+    setTimeout(function () { if (!menuOpen) menu.classList.remove('show'); }, 480);
   }
   function setHidden(v) {
     hidden = v;
@@ -2895,6 +2919,7 @@ if(!SQ_NATIVE){
       if (act === 'sleep') goSleep();
       if (act === 'hide') setHidden(true);
     });
+    shade.addEventListener('pointerdown', function (e) { e.preventDefault(); closeMenu(); });
     back.addEventListener('click', function () { setHidden(false); });
     window.addEventListener('resize', function () {
       scale = pickScale(); applyScale();
