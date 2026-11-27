@@ -2467,7 +2467,8 @@ html.wysPetOpen #wysPetLayer{z-index:207}
 #wysPetMenu.open #wysPetMenuList{opacity:1;transform:none;filter:none;transition-delay:.1s}
 #wysPetMenu button{appearance:none;border:1px solid transparent;background:transparent;color:#d8d8e2;height:34px;padding:0 10px;border-radius:9px;font-size:12px;text-align:left;cursor:pointer;font-family:inherit;white-space:nowrap;flex:0 0 auto}
 #wysPetMenu button:hover,#wysPetMenu button:active{background:rgba(255,255,255,.09)}
-#wysPetBack{position:fixed;right:12px;bottom:calc(86px + var(--safeB,0px));z-index:46;display:none;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:rgba(14,14,20,.8);border:1px solid rgba(232,198,128,.35);color:#e8c680;font-size:12px;cursor:pointer;pointer-events:auto;backdrop-filter:blur(6px);font-family:inherit}
+#wysPetBack{position:fixed;right:12px;bottom:calc(86px + var(--safeB,0px));z-index:46;display:none;align-items:center;justify-content:center;width:52px;height:52px;padding:0;border:0;background:none;cursor:pointer;pointer-events:auto;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;filter:drop-shadow(0 6px 14px rgba(0,0,0,.55))}
+#wysPetBack img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
 #wysPetBack.on{display:flex}
 @media (max-width:760px){#wysPetBack{bottom:calc(100px + var(--safeB,0px))}}
 @media (prefers-reduced-motion:reduce){#wysPetZzz.on{animation:none}#wysPet{transition:none}#wysPetMenu,#wysPetMenuList,#wysPetShade{transition:none}}
@@ -2529,7 +2530,11 @@ html.wysPetOpen #wysPetLayer{z-index:207}
     '</div>';
   anchor.appendChild(menu);
   var back = document.createElement('button');
-  back.id = 'wysPetBack'; back.type = 'button'; back.textContent = '召唤';
+  back.id = 'wysPetBack'; back.type = 'button';
+  back.setAttribute('aria-label', '召唤宠物');
+  var backIco = document.createElement('img');
+  backIco.src = 'pet-icon.webp'; backIco.alt = ''; backIco.draggable = false;
+  back.appendChild(backIco);
   back.setAttribute('aria-label', '显示宠物');
 
   function mount() {
@@ -2937,6 +2942,8 @@ html.wysPetOpen #wysPetLayer{z-index:207}
       e.stopPropagation(); e.preventDefault();
     }, true);
     back.addEventListener('click', function () { setHidden(false); });
+    back.addEventListener('contextmenu', function (e) { e.preventDefault(); });   // 长按不弹菜单
+    back.addEventListener('dragstart', function (e) { e.preventDefault(); });      // 不可拖走
     window.addEventListener('hashchange', closeMenu);   // 点 dock 切页时收起菜单
     window.addEventListener('resize', function () {
       scale = pickScale(); applyScale();
