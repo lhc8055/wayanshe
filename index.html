@@ -2466,12 +2466,16 @@ if(!SQ_NATIVE){
 #wysPetSay{position:absolute;left:50%;bottom:100%;transform:translate(-50%,4px);margin-bottom:4px;padding:5px 9px;border-radius:9px;background:rgba(14,14,20,.94);border:1px solid rgba(232,198,128,.32);color:#f0e6d2;font-size:11px;line-height:1.25;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .16s ease,transform .16s ease}
 #wysPetSay.on{opacity:1;transform:translate(-50%,-2px)}
 #wysPetSay:after{content:"";position:absolute;left:50%;bottom:-4px;width:7px;height:7px;transform:translateX(-50%) rotate(45deg);background:rgba(14,14,20,.94);border-right:1px solid rgba(232,198,128,.32);border-bottom:1px solid rgba(232,198,128,.32)}
-#wysPetShade{position:fixed;inset:0;z-index:44;background:rgba(4,4,8,.5);opacity:0;pointer-events:none;transition:opacity .34s ease}
+#wysPetShade{position:fixed;inset:0;z-index:130;background:rgba(1,1,5,.82);opacity:0;pointer-events:none;transition:opacity .3s ease}
 #wysPetShade.on{opacity:1;pointer-events:auto}
+/* 菜单打开时：遮罩盖住整页（含顶部按钮），只把 dock、宠物、菜单抬到遮罩之上 */
+html.wysPetOpen .dock{z-index:206}
+html.wysPetOpen #wysPetLayer{z-index:207}
+#wysPetBall{position:fixed;left:0;top:0;width:30px;height:30px;border-radius:50%;z-index:208;pointer-events:none;opacity:0;background:radial-gradient(circle at 35% 30%,#c9c2ff,#6a55e6 42%,#2b1f6b 78%,rgba(18,12,48,.95));box-shadow:0 0 18px rgba(112,92,255,.6),0 0 46px rgba(88,66,220,.28)}
 #wysPetMenuAnchor{position:fixed;left:0;top:0;z-index:211;transform:translate(-50%,-100%);pointer-events:none}
-#wysPetMenu{position:relative;width:42px;height:42px;border-radius:999px;overflow:hidden;opacity:0;visibility:hidden;background:rgba(14,14,20,.97);border:1px solid rgba(255,255,255,.15);box-shadow:0 18px 44px rgba(0,0,0,.62);backdrop-filter:blur(12px);pointer-events:auto;transition:width .46s cubic-bezier(.32,.72,0,1),height .46s cubic-bezier(.32,.72,0,1),border-radius .46s cubic-bezier(.32,.72,0,1),opacity .16s ease,visibility .16s}
-#wysPetMenu.show{opacity:1;visibility:visible}
-#wysPetMenu.open{width:148px;height:158px;border-radius:18px}
+#wysPetMenu{position:relative;width:136px;height:158px;max-width:calc(100vw - 16px);border-radius:16px;overflow:hidden;opacity:0;visibility:hidden;transform:translateY(var(--from-y,12px)) scale(.86);transform-origin:50% 100%;background:rgba(10,10,16,.98);border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 44px rgba(0,0,0,.66);backdrop-filter:blur(12px);pointer-events:auto;transition:opacity .26s ease,transform .36s cubic-bezier(.2,1,.3,1),visibility .26s}
+#wysPetMenu.show{visibility:visible}
+#wysPetMenu.open{opacity:1;transform:none;transition-delay:.07s}
 #wysPetMenuList{position:absolute;inset:6px;display:flex;flex-direction:column;gap:3px;opacity:0;transform:translateY(10px) scale(.97);filter:blur(7px);transition:opacity .3s ease,transform .3s ease,filter .3s ease}
 #wysPetMenu.open #wysPetMenuList{opacity:1;transform:none;filter:none;transition-delay:.1s}
 #wysPetMenu button{appearance:none;border:1px solid transparent;background:transparent;color:#d8d8e2;height:34px;padding:0 10px;border-radius:9px;font-size:12px;text-align:left;cursor:pointer;font-family:inherit;white-space:nowrap;flex:0 0 auto}
@@ -2537,6 +2541,8 @@ if(!SQ_NATIVE){
       '<button data-act="hide">隐藏宠物</button>' +
     '</div>';
   anchor.appendChild(menu);
+  var ball = document.createElement('div');
+  ball.id = 'wysPetBall';
   var back = document.createElement('button');
   back.id = 'wysPetBack'; back.type = 'button'; back.textContent = '召唤';
   back.setAttribute('aria-label', '显示宠物');
@@ -2544,6 +2550,7 @@ if(!SQ_NATIVE){
   function mount() {
     document.body.appendChild(layer);
     document.body.appendChild(shade);
+    document.body.appendChild(ball);
     document.body.appendChild(anchor);
     document.body.appendChild(back);
   }
@@ -2851,19 +2858,43 @@ if(!SQ_NATIVE){
   }
 
   /* ---------- 菜单：贴着宠物上方弹出，不遮住宠物、不被底部导航裁掉 ---------- */
-  /* 菜单：从宠物身上长出来，向上展开（77 的形变过渡） */
+  /* 菜单：圆形光球从宠物身上飞向窗口位置并被窗口盖住，窗口随即展开 */
+  var MENU_W = 136, MENU_H = 158;
+  function visW() {
+    var vv = window.visualViewport;
+    var w = viewW();
+    if (vv && vv.width) w = Math.min(w, vv.width);
+    if (window.innerWidth) w = Math.min(w, window.innerWidth);
+    return w;
+  }
   function placeMenu() {
-    var open_ = menuOpen;
-    var mw = open_ ? (menu.offsetWidth || 148) : 148;      // 按展开后的尺寸计算描点
-    var mh = open_ ? (menu.offsetHeight || 158) : 158;
+    var mw = MENU_W, mh = MENU_H;
     var cx = pos.x + petW() / 2;
-    cx = Math.max(mw / 2 + 8, Math.min(viewW() - mw / 2 - 8, cx));
+    cx = Math.max(mw / 2 + 8, Math.min(visW() - mw / 2 - 8, cx));
     var up = pos.y + 10;                                    // 面板底边贴着宠物头顶（压在精灵留白上）
     var down = pos.y + petH() + 2;
-    var flip = up - mh < 8 && viewH() - down > mh + 8;      // 头顶没空间就朝下长
+    var flip = up - mh < 8 && viewH() - down > mh + 8;      // 头顶没空间就朝下展开
     anchor.style.left = Math.round(cx) + 'px';
     anchor.style.top = Math.round(flip ? down : up) + 'px';
     anchor.style.transform = flip ? 'translate(-50%,0)' : 'translate(-50%,-100%)';
+    menu.style.setProperty('--from-y', flip ? '-12px' : '12px');
+    menu.style.transformOrigin = flip ? '50% 0' : '50% 100%';
+    return { cx: cx, edge: flip ? down : up };
+  }
+  /* 光球：从宠物身上飞到窗口底边，0.5s 内完成并逐渐消失 */
+  function flyBall(cx, ty) {
+    if (reduced || !ball.animate) return;
+    var bx = pos.x + petW() / 2, by = pos.y + petH() * 0.45;
+    ball.style.left = (bx - 15) + 'px';
+    ball.style.top = (by - 15) + 'px';
+    ball.style.opacity = '1';
+    var dx = cx - bx, dy = ty - by;
+    var a = ball.animate([
+      { transform: 'translate(0,0) scale(.66)', opacity: .85, offset: 0 },
+      { transform: 'translate(' + (dx * .5).toFixed(1) + 'px,' + (dy * .5).toFixed(1) + 'px) scale(1.02)', opacity: .9, offset: .42 },
+      { transform: 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px) scale(.45)', opacity: 0, offset: 1 }
+    ], { duration: 500, easing: 'cubic-bezier(.32,.04,.16,1)', fill: 'forwards' });
+    a.onfinish = function () { ball.style.opacity = '0'; };
   }
   function openMenu() {
     clearTimeout(longTimer);
@@ -2873,8 +2904,10 @@ if(!SQ_NATIVE){
     menuOpen = true;
     menu.classList.remove('open');
     menu.classList.add('show');
-    placeMenu();
+    var spot = placeMenu();
+    document.documentElement.classList.add('wysPetOpen');   // 遮罩盖住整页，只留 dock 可点
     shade.classList.add('on');
+    flyBall(spot.cx, spot.edge);
     requestAnimationFrame(function () {
       if (menuOpen) menu.classList.add('open');
     });
@@ -2884,7 +2917,9 @@ if(!SQ_NATIVE){
     menuOpen = false;
     menu.classList.remove('open');
     shade.classList.remove('on');
-    setTimeout(function () { if (!menuOpen) menu.classList.remove('show'); }, 480);
+    document.documentElement.classList.remove('wysPetOpen');
+    ball.style.opacity = '0';
+    setTimeout(function () { if (!menuOpen) menu.classList.remove('show'); }, 300);
   }
   function setHidden(v) {
     hidden = v;
@@ -2921,6 +2956,7 @@ if(!SQ_NATIVE){
     });
     shade.addEventListener('pointerdown', function (e) { e.preventDefault(); closeMenu(); });
     back.addEventListener('click', function () { setHidden(false); });
+    window.addEventListener('hashchange', closeMenu);   // 点 dock 切页时收起菜单
     window.addEventListener('resize', function () {
       scale = pickScale(); applyScale();
       if (enter) enter.to = maxX();
