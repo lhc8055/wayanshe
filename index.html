@@ -2475,7 +2475,7 @@ html.wysPetOpen #wysPetLayer{z-index:207}
 #wysPetMenu{position:relative;width:42px;height:42px;border-radius:999px;overflow:hidden;opacity:0;visibility:hidden;background:rgba(10,10,16,.98);border:1px solid rgba(255,255,255,.14);box-shadow:0 16px 38px rgba(0,0,0,.62);backdrop-filter:blur(12px);pointer-events:auto;transition:width .46s cubic-bezier(.32,.72,0,1),height .46s cubic-bezier(.32,.72,0,1),border-radius .46s cubic-bezier(.32,.72,0,1),opacity .32s ease,visibility .32s}
 #wysPetMenu.show{opacity:1;visibility:visible}
 #wysPetMenu.open{width:136px;height:158px;border-radius:16px}
-#wysPetMenu.fading{opacity:0}
+#wysPetMenu.fading{opacity:0;pointer-events:none}
 #wysPetMenuList{position:absolute;inset:6px;display:flex;flex-direction:column;gap:3px;opacity:0;transform:translateY(10px) scale(.97);filter:blur(7px);transition:opacity .3s ease,transform .3s ease,filter .3s ease}
 #wysPetMenu.open #wysPetMenuList{opacity:1;transform:none;filter:none;transition-delay:.1s}
 #wysPetMenu button{appearance:none;border:1px solid transparent;background:transparent;color:#d8d8e2;height:34px;padding:0 10px;border-radius:9px;font-size:12px;text-align:left;cursor:pointer;font-family:inherit;white-space:nowrap;flex:0 0 auto}
