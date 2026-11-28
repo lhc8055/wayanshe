@@ -2407,7 +2407,7 @@ document.addEventListener('click',e=>{
   if(t.dataset.oauth)return doOauth(t.dataset.oauth,t);
   if(t.dataset.astep)return authGo(t.dataset.astep,-1);
   if(t.matches('[data-getcode]'))return getCode(t);
-  if(t.dataset.doc){e.preventDefault();return toast('《'+t.dataset.doc+'》内容待补充')}
+  if(t.dataset.doc){e.preventDefault();const p=t.dataset.doc==='隐私政策'?'privacy.html':'terms.html';const w=window.open(p,'_blank');if(!w)location.href=p;return}
   if(t.classList.contains('chip')){
     const box=t.parentNode;
     if(box.matches('[data-tabs]')){$$('.chip',box).forEach(c=>c.classList.toggle('on',c===t));pillTo(box,true);t.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});swapPanel(t.closest('.view'),t.dataset.tab);return}

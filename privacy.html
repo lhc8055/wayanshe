@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>隐私政策 - 瓦研社</title>
+    <style>
+        :root {
+            --primary-red: #ff4655;
+            --bg-dark: #0f0f11;
+            --bg-card: #1a1a1f;
+            --text-main: #e0e0e0;
+            --text-muted: #888888;
+            --border-color: #2a2a32;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 40px;
+        }
+        .header {
+            position: sticky;
+            top: 0;
+            background: rgba(15, 15, 17, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+        }
+        .logo {
+            font-size: 18px;
+            font-weight: 900;
+            font-style: italic;
+            letter-spacing: 1px;
+            color: #fff;
+        }
+        .logo span { color: var(--primary-red); }
+        .back-btn {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 5px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .back-btn:hover { color: #fff; border-color: var(--primary-red); }
+
+        .page-title-area {
+            padding: 40px 20px 20px;
+            background: linear-gradient(180deg, rgba(255,70,85,0.15) 0%, rgba(15,15,17,1) 100%);
+        }
+        .page-title {
+            font-size: 32px;
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            color: #fff;
+            position: relative;
+            display: inline-block;
+        }
+        .page-title::before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 5px;
+            bottom: 5px;
+            width: 4px;
+            background-color: var(--primary-red);
+        }
+        .date-info {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .content-block {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+        h2 {
+            font-size: 18px;
+            color: #fff;
+            margin: 30px 0 15px 0;
+            padding-left: 10px;
+            border-left: 3px solid var(--primary-red);
+            font-style: italic;
+        }
+        h2:first-child { margin-top: 0; }
+        p { margin-bottom: 15px; font-size: 14px; text-align: justify; }
+        .highlight {
+            color: #fff;
+            font-weight: bold;
+        }
+        .warning {
+            color: var(--primary-red);
+            font-weight: bold;
+        }
+        ul { margin-bottom: 15px; padding-left: 20px; font-size: 14px; }
+        li { margin-bottom: 8px; }
+        
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+        th { background-color: rgba(255,70,85,0.1); color: #fff; font-weight: bold; }
+        td { color: var(--text-muted); }
+
+        .footer {
+            text-align: center;
+            padding: 40px 20px 20px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">瓦研社<span>.</span></div>
+        <!-- 修改点：添加 target="_top" 强制顶层跳转，并加入 onclick 双重保险 -->
+        <a href="https://wayanshe.xyz/" target="_top" onclick="window.location.href='https://wayanshe.xyz/'; return false;" class="back-btn">返回首页</a>
+    </div>
+
+    <div class="page-title-area">
+        <div class="container" style="padding: 0;">
+            <div class="page-title">隐私政策</div>
+            <div class="date-info">生效日期：2026年11月28日 &nbsp;|&nbsp; 更新日期：2026年11月28日</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content-block">
+            <p>瓦研社（域名：wayanshe.xyz，以下简称“本站”）深知个人信息对您的重要性。本政策将详细说明我们如何收集、使用、存储、共享和保护您的个人信息，以及您享有的法定权利。</p>
+            <p class="highlight">本政策适用于您通过QQ或微信登录并使用本站的全过程。请您在登录前仔细阅读本政策。涉及手机号强制绑定、数据存储于境外基础设施等关键内容，我们已以高亮加粗形式提示。</p>
+
+            <h2>一、 我们收集哪些个人信息</h2>
+            <p>我们遵循合法、正当、必要和诚信原则，仅收集实现具体功能所必需的信息。</p>
+            <p><span class="highlight">1. 第三方快捷登录信息：</span>当您通过QQ或微信授权登录本站时，我们从腾讯相应服务接收：您在该平台的用户唯一标识（OpenID 或 UnionID）、昵称、头像。<span class="warning">我们绝对不会获取您的QQ/微信密码、好友列表或聊天记录。</span></p>
+            <p><span class="highlight">2. 手机号码（敏感个人信息）：</span>首次登录后，您需要绑定中国大陆手机号码。用途严格限于：(1) 满足网络实名制相关法律法规要求；(2) 账号安全验证与找回；(3) 处理投诉时进行身份核验。<span class="warning">我们郑重承诺：手机号仅用于上述目的，绝不用于营销推广，绝不向任何第三方出售或出租。</span>如您拒绝绑定，将无法使用收藏、评论、投稿等互动功能，但不影响浏览公开攻略。</p>
+            <p><span class="highlight">3. 互动内容数据：</span>当您发布评论、投稿攻略、收藏点位时，我们会存储您主动提交的文字、图片、时间戳及关联账号标识。请注意，您公开发布的内容可能被其他用户或搜索引擎抓取，请勿在公开内容中填写个人隐私。</p>
+            <p><span class="highlight">4. 日志与设备信息：</span>为保障基本运行与安全，我们的基础设施服务商（如Cloudflare）会自动记录访问日志，包括IP地址、浏览器类型、访问时间等。<span class="highlight">我们本身不主动构建用户画像，不将日志用于广告投放。</span></p>
+
+            <h2>二、 我们如何存储您的个人信息（跨境说明）</h2>
+            <p>您的个人信息存储于以下基础设施中：</p>
+            <table>
+                <tr>
+                    <th>服务商</th>
+                    <th>存储内容</th>
+                    <th>所在区域</th>
+                </tr>
+                <tr>
+                    <td><strong>Supabase</strong></td>
+                    <td>账号标识、昵称、手机号、发布内容等业务数据</td>
+                    <td>境外云基础设施 (如美国/新加坡)</td>
+                </tr>
+                <tr>
+                    <td><strong>Cloudflare</strong></td>
+                    <td>访问日志、网络请求信息（CDN加速与防护）</td>
+                    <td>全球网络（含境外节点）</td>
+                </tr>
+                <tr>
+                    <td><strong>GitHub</strong></td>
+                    <td>前端代码部署相关技术日志</td>
+                    <td>境外平台</td>
+                </tr>
+            </table>
+            <p class="warning">重要提示：由于Supabase和Cloudflare的境外基础设施涉及个人信息出境。您的账号标识、手机号和发布内容可能被传输至位于中华人民共和国境外的服务器进行存储和处理。我们已通过签订适用的数据传输协议或标准合同条款来保障您的数据安全。</p>
+            <p>存储期限：我们仅在实现目的所需的最短期限内保留您的信息。账号注销后，除法律法规要求保留的（如日志留存）外，我们将删除或匿名化您的个人信息。</p>
+
+            <h2>三、 我们如何共享您的信息</h2>
+            <p>我们不会向任何第三方出售您的个人信息。仅在以下情形下共享或委托处理：</p>
+            <p>1. <span class="highlight">委托处理：</span>我们委托 Supabase、Cloudflare、GitHub 处理上述数据，他们仅作为受托方按照我们的指示提供服务，不得将数据用于其自身商业目的。</p>
+            <p>2. <span class="highlight">第三方登录独立性：</span>QQ和微信登录由深圳市腾讯计算机系统有限公司提供。您在腾讯侧的隐私处理适用腾讯的隐私政策，本站仅接收登录必需的标识、昵称和头像。</p>
+            <p>3. <span class="highlight">法定情形：</span>根据法律法规、司法或行政机关强制性要求，或为维护公共利益及您本人重大合法权益所必需时。</p>
+
+            <h2>四、 您对个人信息的权利</h2>
+            <p>根据《个人信息保护法》，您享有以下权利：</p>
+            <ul>
+                <li><strong>查阅、复制权：</strong>您可在账号设置中自行查看，或通过邮箱申请副本。</li>
+                <li><strong>更正、补充权：</strong>昵称头像可重新授权更新；手机号可申请换绑。</li>
+                <li><strong>删除权：</strong>您可自行删除发布的内容，或申请注销账号以清空数据。</li>
+                <li><strong>撤回同意权：</strong>您有权撤回对手机号处理的同意。但<span class="warning">撤回同意将导致您无法继续使用需登录的互动功能。</span></li>
+            </ul>
+            <p>我们将在收到请求并验证身份后15个工作日内予以答复；情况复杂的，可延长至30个工作日。</p>
+
+            <h2>五、 未成年人保护</h2>
+            <p>1. 本站主要面向游戏玩家。若您是不满十四周岁的儿童，<span class="warning">请绝对不要绑定手机号或使用本站需要登录的功能。</span>我们不会在未取得监护人同意的情况下主动收集儿童个人信息。</p>
+            <p>2. 若您是已满十四周岁但未满十八周岁的未成年人，请在监护人指导下阅读本政策，并在取得监护人同意后使用。</p>
+            <p>3. 如监护人发现我们在未事先取得同意的情况下收集了儿童信息，请通过本政策邮箱联系我们，我们将尽快删除。</p>
+
+            <h2>六、 信息安全与免责</h2>
+            <p>1. 我们采取与风险相适应的技术措施（如Supabase的访问控制、Cloudflare的传输加密）保护您的信息。</p>
+            <p>2. <span class="warning">但请注意：任何互联网传输和存储方式都无法保证100%绝对安全。因黑客攻击、网络基础设施故障（如Supabase或Cloudflare宕机）、不可抗力导致的个人信息泄露、丢失或篡改，本站已尽到合理保护义务的，不承担法律责任。</span>如发生安全事件，我们将按法律要求及时告知您及主管部门。</p>
+
+            <h2>七、 联系我们</h2>
+            <p>如您对本政策有任何疑问、投诉，或希望行使上述权利，请通过以下方式联系我们：</p>
+            <p>电子邮箱：<span class="highlight">3552453862@qq.com</span></p>
+            <p>如您对我们的答复不满意，您还可以向网信、市场监管等主管部门投诉，或依法向人民法院提起诉讼。</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        © 2026 瓦研社 Wayanshe.xyz 版权所有<br>本平台为非官方玩家社区
+    </div>
+
+</body>
+</html>
