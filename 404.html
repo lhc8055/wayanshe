@@ -3208,8 +3208,9 @@ html.wysPetOpen #wysPetLayer{z-index:207}
     };
     img.src = SPRITE;
   }
-  if (document.readyState === 'complete') setTimeout(boot, 600);
-  else window.addEventListener('load', function () { setTimeout(boot, 600); });
+  /* 不等 load（外部大图常拖到数秒后），DOM 就绪即挂载，贴图自己异步加载 */
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(boot, 450); }, { once: true });
+  else setTimeout(boot, 450);
 })();
 </script>
 </body>
