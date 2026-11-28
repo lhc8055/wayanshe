@@ -568,16 +568,18 @@ svg.i{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.8;stroke
 
 /* 不同卡片不同入场方式 */
 .mp.rv.in{animation:mpin .95s var(--ease) calc(var(--i,0)*80ms) backwards}
-@keyframes mpin{from{opacity:0;transform:translateY(46px) skewY(3deg) scale(.94)}}
+@keyframes mpin{from{opacity:0;transform:translate3d(0,26px,0)}}
 .ag.rv.in{animation:agin .9s var(--ease) calc(var(--i,0)*70ms) backwards}
 @keyframes agin{from{opacity:0;transform:translateX(70px) skewX(-8deg)}}
 .ut{position:relative;overflow:hidden}
 .ut.rv.in{animation:utin .8s var(--ease) calc(var(--i,0)*55ms) backwards}
 @keyframes utin{from{opacity:0;transform:scale(.55) rotate(-7deg)}}
 .mp{contain:layout paint}
-.mp-ph{transform:scale(1.04);transition:transform 1.4s var(--ease);will-change:transform;backface-visibility:hidden}
-.mp.rv.in .mp-ph{animation:mpimg 1.6s var(--ease) calc(var(--i,0)*80ms + 100ms) backwards}
-@keyframes mpimg{from{transform:scale(1.4)}}
+.mp-ph{transform:scale(1.04);transition:transform 1.1s var(--ease)}
+.mp-ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mp-ph::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(6,6,10,.62),rgba(6,6,10,.18) 55%)}
+/* 屏幕外的内容不参与排版 / 绘制 / 动画：滑回来时浏览器自动恢复（content-visibility），首页分区、地图卡都用它 */
+.hero.off *,.hero.off *::before,.hero.off *::after{animation-play-state:paused!important}
 .mp.hv .mp-ph,.mp:active .mp-ph{transform:scale(1.14)}
 .tile-w{transition:transform .7s var(--ease),-webkit-text-stroke-color .4s}
 .tile.hv .tile-w,.tile:active .tile-w{transform:translateX(-12px) skewX(-6deg);-webkit-text-stroke-color:rgba(255,255,255,.42)}
@@ -1068,6 +1070,21 @@ a[data-h]{cursor:pointer}
 .sqf{border-radius:0!important;border-color:transparent!important}
 .sqf.sqp{position:relative}
 .sqr{position:absolute;pointer-events:none;z-index:2}
+
+/* 登录弹层：顶部把手叠在头图上，去掉头图上方的黑带 */
+.sheet.auth::before{position:absolute;left:50%;top:10px;margin:0 0 0 -20px;z-index:5}
+.sheet.auth .lg-hero{border-radius:27px 27px 0 0;margin-top:0}
+.sheet.auth .oas{margin-top:2px}
+.sheet.auth .agree{margin-top:18px;margin-bottom:6px}
+.sheet.auth .ferr{display:none}
+/* 地图详情区块导航：滑块与按钮对齐，样式与其他页面一致 */
+.mdn .cpill{top:10px}
+/* 我的 */
+.mgu{padding:28px 22px 24px}
+.mgu .btn{width:100%}
+.mgu>p{margin-bottom:20px}
+.mrow.kf{margin-top:14px;padding:14px;color:inherit;text-decoration:none}
+.mrow.kf span b{font-size:15px;letter-spacing:.04em}
 </style>
 </head>
 <body>
@@ -1360,7 +1377,7 @@ const HEROH=()=>Math.min(Math.round(innerHeight*.62),560);
 const REC_KEY='wys_recent_maps',recents=()=>ls.get(REC_KEY,[]);
 function pushRecent(id){const r=recents().filter(x=>x!==id);r.unshift(id);ls.set(REC_KEY,r.slice(0,5));const mv=document.querySelector('.view[data-view="maps"]');if(mv){mv._ready=null;mv._pk=null}}
 const bgOf=m=>m.img?`linear-gradient(0deg,rgba(6,6,10,.62),rgba(6,6,10,.18) 55%),url('${m.img}')`:`linear-gradient(135deg,hsl(${m.h} 62% 22%),#08080c 72%)`;
-const mapCard=m=>{const n=MAPS.indexOf(m)+1,last=recents()[0]===m.id;return `<button class="mp tilt" data-open="map:${m.id}" data-mid="${m.id}" style="--h:${m.h}">${m.img?`<span class="mp-ph" style="background-image:linear-gradient(0deg,rgba(6,6,10,.62),rgba(6,6,10,.18) 55%),url('${m.img}')"></span>`:''}<span class="mp-g">${m.en}</span><span class="mp-t">${m.sites}</span><span class="mp-n${last?' last':''}">${last?'上次看到':String(n).padStart(2,'0')}</span><span class="mp-i"><b>${m.cn}</b><em>${m.feat}</em><span class="mp-m"><i>攻 ${m.atk.length}</i><i class="d">守 ${m.def.length}</i><i class="r">阵容 ${m.rec.length}</i></span></span></button>`};
+const mapCard=m=>{const n=MAPS.indexOf(m)+1,last=recents()[0]===m.id;return `<button class="mp tilt" data-open="map:${m.id}" data-mid="${m.id}" style="--h:${m.h}">${m.img?`<span class="mp-ph"><img src="${m.img}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" draggable="false" onerror="this.remove()"></span>`:''}<span class="mp-g">${m.en}</span><span class="mp-t">${m.sites}</span><span class="mp-n${last?' last':''}">${last?'上次看到':String(n).padStart(2,'0')}</span><span class="mp-i"><b>${m.cn}</b><em>${m.feat}</em><span class="mp-m"><i>攻 ${m.atk.length}</i><i class="d">守 ${m.def.length}</i><i class="r">阵容 ${m.rec.length}</i></span></span></button>`};
 const artCard=a=>`<button class="card ar tilt" data-open="article:${a.id}" style="--h:${a.h}" data-tag="${a.tag}"><div class="ar-c"><em>${a.tag}</em><span>${String(ARTICLES.indexOf(a)+1).padStart(2,'0')}</span></div><div class="ar-b"><h3>${a.title}</h3><p>${a.sum}</p><div class="meta"><span>${ic('clock')}${a.min} 分钟</span><span>${a.lv}</span>${dones().includes(a.id)?`<span class="done-tag">${ic('check')}已学习</span>`:''}</div></div></button>`;
 const itemCard=i=>`<button class="card it tilt" data-open="item:${i.id}"><div class="it-h"><span class="it-ic">${ic(i.ic)}</span><div><b>${i.n}</b><em>${i.en}</em></div></div><p>${i.d}</p><div class="tags">${i.tags.map(t=>`<span>${t}</span>`).join('')}</div></button>`;
 
@@ -1537,8 +1554,8 @@ const VIEWS={
  me(){
   const u=Auth.user,f=favs();
   const go=(h,i,t,d)=>`<button class="mrow" data-go="${h}"><i>${ic(i)}</i><span><b>${t}</b><em>${d}</em></span>${ic('arrow')}</button>`;
-  const links=`<h4 class="spg" style="margin-top:26px">快捷入口<small>QUICK ACCESS</small></h4><div class="mlist" data-stagger>${go('items','items','点位库','按特工 / 地图查看点位')}${go('agents','agent','特工图鉴',AGENTS.length+' 位特工')}${go('tactics','skin','皮肤排名','按武器分类的皮肤榜')}</div>`;
-  if(!u)return `<div class="mep wrap"><div class="mgu rv"><span class="mgu-l">${ic('user')}</span><h2>登录瓦研社</h2><p>同步收藏，换设备也不丢</p><ul><li>${ic('mark')}收藏特工、地图与点位</li><li>${ic('check')}多端同步你的数据</li><li>${ic('user')}微信 / QQ 一键登录，新用户自动注册</li></ul><button class="btn" data-login><span>微信 / QQ 登录</span></button></div>${links}${footer()}</div>`;
+  const links=`<a class="mrow kf" href="https://qm.qq.com/q/Pr6dKRC3m4" target="_blank" rel="noopener"><i>${ic('user')}</i><span><b>联系客服</b></span>${ic('arrow')}</a>`;
+  if(!u)return `<div class="mep wrap"><div class="mgu rv"><span class="mgu-l">${ic('user')}</span><h2>登录瓦研社</h2><p>同步收藏，换设备也不丢</p><button class="btn" data-login><span>微信 / QQ 登录</span></button></div>${links}${footer()}</div>`;
   const favItems=f.map(k=>{const[t,id]=k.split(':');const o=byId(t,id);return o?`<button class="chip" data-open="${k}">${esc(o.name||o.cn||o.n||o.title)}</button>`:''}).join('');
   return `<div class="mep wrap"><div class="mhd rv"><div class="av">${u.avatar?`<img src="${esc(u.avatar)}" alt="">`:esc((u.nickname||'瓦')[0].toUpperCase())}</div><div class="mhd-t"><h2>${esc(u.nickname||'玩家')}</h2><p>Lv.${esc(u.level??1)} · ID ${esc(u.id??'—')}${u.phone?' · '+esc(u.phone):''}</p></div><button class="mhd-o" data-logout aria-label="退出登录">${ic('out')}</button></div>
   <div class="mstat rv"><div><b>${f.length}</b><span>收藏</span></div><div><b>${SPOTS.length}</b><span>点位</span></div><div><b>${WEAPONS.length}</b><span>武器</span></div></div>
@@ -1757,14 +1774,12 @@ const QQ='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#12B7F5" d="M2
 const stepLogin=()=>`<div class="astep" data-step="login">
   <div class="lg-hero"><i class="lg-glow"></i><i class="lg-grid"></i><svg class="lg-logo" aria-hidden="true"><use href="#logo-big" width="100%" height="100%"/></svg></div>
   <div class="auth-h"><h3 class="auth-t">欢迎来到瓦研社</h3><p>登录后同步你的收藏与学习进度</p></div>
-  <div class="lg-perks"><span>${ic('mark')}收藏攻略</span><span>${ic('check')}学习进度</span><span>${ic('bolt')}多端同步</span></div>
   <div class="oas">
    <button type="button" class="oa wx" data-oauth="wechat"><span class="oa-i">${WX}</span><b>微信一键登录</b><i class="oa-s"></i></button>
    <button type="button" class="oa qq" data-oauth="qq"><span class="oa-i">${QQ}</span><b>QQ 一键登录</b><i class="oa-s"></i></button>
   </div>
   <label class="ck agree"><input type="checkbox" id="agree"><i></i><span>我已阅读并同意<span data-doc="用户协议">《用户协议》</span>与<span data-doc="隐私政策">《隐私政策》</span></span></label>
   <p class="ferr" role="alert"></p>
-  <p class="lg-note">${ic('shield')}新用户首次登录需绑定手机号，防止数据丢失</p>
  </div>`;
 const stepBind=()=>`<div class="astep" data-step="bind">
   <button type="button" class="aback" data-astep="login" aria-label="返回">${ic('arrow')}<span>返回</span></button>
@@ -1796,7 +1811,7 @@ async function authGo(name,dir=1){
 }
 async function doOauth(p,btn){
   const box=btn.closest('.astep'),err=$('.ferr',box),ag=$('#agree');err.textContent='';
-  if(!ag.checked){err.textContent='请先阅读并同意用户协议与隐私政策';const l=ag.closest('.ck');l.classList.remove('shake');void l.offsetWidth;l.classList.add('shake');return}
+  if(!ag.checked){toast('请先阅读并同意用户协议与隐私政策');const l=ag.closest('.ck');l.classList.remove('shake');void l.offsetWidth;l.classList.add('shake');return}
   const oas=$('.oas',box);btn.classList.add('load');oas.classList.add('busy');
   try{
     const r=await Auth.oauth(p);
@@ -1926,10 +1941,14 @@ function countUp(el){
     el.textContent=p>=1?to:v;if(p<1)requestAnimationFrame(f);else el.classList.add('fin')})(t0);
 }
 const io=new IntersectionObserver(es=>es.forEach(e=>{
-  if(!e.isIntersecting)return;const t=e.target;t.classList.add('in');io.unobserve(t);
+  if(!e.isIntersecting)return;const t=e.target;io.unobserve(t);
+  if(t.classList.contains('mp')){const im=$('img',t);if(im&&!im.complete){const go=()=>t.classList.add('in');let d=0;const f=()=>{if(d++)return;go()};(im.decode?im.decode():Promise.reject()).then(f,f);setTimeout(f,380);return}}
+  t.classList.add('in');
   if(t.classList.contains('nums')){$$('[data-count]',t).forEach(countUp);$$('small',t).forEach((x,i)=>scramble(x,350+i*90))}
 }),{rootMargin:'0px 0px -8% 0px',threshold:.06});
+const mpNear=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;mpNear.unobserve(e.target);const im=$('img',e.target);if(im){im.loading='eager';im.decode&&im.decode().catch(()=>{})}}),{rootMargin:'1600px 0px'});
 function reveal(root){
+  $$('.mp',root).forEach(el=>mpNear.observe(el));
   $$('[data-stagger]',root).forEach(p=>[...p.children].forEach((c,i)=>{c.classList.add('rv');c.style.setProperty('--i',Math.min(i,7))}));
   $$('.nums .nm',root).forEach((c,i)=>c.style.setProperty('--i',i));
   $$('.rv,.spl,.kick,.sub,.nums',root).forEach(el=>{if(!el.closest('.sl'))io.observe(el)});
@@ -1968,7 +1987,7 @@ function initHero(root){
   hero.addEventListener('pointercancel',()=>drag=false);
   hero.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;const r=hero.getBoundingClientRect();hp.tx=(e.clientX-r.left)/r.width-.5;hp.ty=(e.clientY-r.top)/r.height-.5},{passive:true});
   H={el:hero,vis:true,layers:$$('.lay',hero).map(l=>({l,d:+l.dataset.d,s:''}))};
-  new IntersectionObserver(es=>{if(H&&H.el===hero)H.vis=es[0].isIntersecting}).observe(hero);
+  new IntersectionObserver(es=>{const v=es[0].isIntersecting;hero.classList.toggle('off',!v);if(H&&H.el===hero)H.vis=v}).observe(hero);   /* 轮播滑出屏幕：所有动画暂停，滑回来再继续 */
   requestAnimationFrame(()=>requestAnimationFrame(()=>go(0)));
 }
 /* 切后台再回来：浏览器会丢掉 backdrop-filter 的 GPU 资源 / 滤镜位图，玻璃质感消失。回来时换新 id 重建全部滤镜并强制重新栅格化 */
@@ -2011,12 +2030,13 @@ function initPills(root){$$('.chips',root).forEach(b=>pillTo(b,false))}
 const topEl=$('#top'),prog=$('#prog');
 const cgl={el:$('#cglow'),x:0,y:0,tx:0,ty:0,on:false};
 if(matchMedia('(hover:hover) and (pointer:fine)').matches&&!RM){cgl.on=true;window.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;if(!cgl.el.classList.contains('on')){cgl.x=cgl.tx=e.clientX;cgl.y=cgl.ty=e.clientY;cgl.el.classList.add('on')}cgl.tx=e.clientX;cgl.ty=e.clientY},{passive:true});document.documentElement.addEventListener('mouseleave',()=>cgl.el.classList.remove('on'))}
-let last=performance.now(),lastY=scrollY,sv=0,sc=false,py=-1;
+let last=performance.now(),lastY=scrollY,sv=0,sc=false,py=-1,mxT=0,mxC=0;
 function frame(t){
   requestAnimationFrame(frame);
   const dt=Math.min(.05,(t-last)/1000)||.016;last=t;
   const y=scrollY;sv+=((y-lastY)/dt-sv)*Math.min(1,dt*9);lastY=y;
-  if(y!==py){py=y;const s=sc?y>2:y>10;if(s!==sc){sc=s;topEl.classList.toggle('sc',s)}const mx=document.documentElement.scrollHeight-innerHeight;prog.style.transform=`scaleX(${mx>0?Math.min(1,y/mx).toFixed(4):0})`}
+  if(y!==py){py=y;const s=sc?y>2:y>10;if(s!==sc){sc=s;topEl.classList.toggle('sc',s)}if(t-mxT>450||mxC<=0){mxT=t;mxC=document.documentElement.scrollHeight-innerHeight}   /* 每帧读 scrollHeight 会强制整页布局（滚动掉帧的元凶之一）：缓存，每 450ms 才刷新一次 */
+    prog.style.transform=`scaleX(${mxC>0?Math.min(1,y/mxC).toFixed(4):0})`}
   if(!RM){
     const boost=Math.min(Math.abs(sv),2600)*.12,sk=Math.max(-7,Math.min(7,sv*-.006));
     for(const m of MQ){if(!m.vis||!m.anim)continue;const r=1+boost/m.sp;if(Math.abs(r-m.rate)>.03){m.rate=r;m.anim.playbackRate=r}
@@ -2031,16 +2051,17 @@ function frame(t){
 let ARG='',HOLD=false;
 /* 静态页面缓存：dock 来回切换时直接复用已渲染的 DOM，换页只剩切换显示，不再重建几百个节点 */
 const CACHE=new Set(['home','agents','items','maps','tactics']);
-const isCached=(n,arg)=>{const el=$(`.view[data-view="${n}"]`);return !!(el&&CACHE.has(n)&&(el._ready===n+':'+(arg||'')||el._pk===n+':'+(arg||'')))};
+const isCached=(n,arg)=>{const el=$(`.view[data-view="${n}"]`);return !!(el&&(CACHE.has(n)||n==='me')&&(el._ready===n+':'+(arg||'')||(el._pk===n+':'+(arg||'')&&(n!=='me'||el._sig===meSig()))))};
 /* 空闲时逐个预建：一次只建一页，页与页之间留出空档，不会堵住动画 */
-const RESQ=['items','agents','tactics','maps'];
+const RESQ=['items','agents','tactics','maps','me'];
+const meSig=()=>JSON.stringify([Auth.user,favs()]);   /* “我的”页依赖登录与收藏：预建时记下签名，挂载时不一致就重建 */
 let lastAct=0;['pointerdown','touchmove','scroll','wheel'].forEach(t=>window.addEventListener(t,()=>{lastAct=performance.now()},{passive:true,capture:true}));
 function residentize(){
   if(busy||performance.now()-lastAct<1200||document.hidden){setTimeout(()=>{(window.requestIdleCallback||setTimeout)(residentize,{timeout:3000})},700);return}   /* 用户正在滑动 / 点按 / 转场中：先让路 */
   const n=RESQ.shift();if(!n)return;
   const el=$(`.view[data-view="${n}"]`);
   if(el&&!el._ready&&!el._pk&&!el.classList.contains('on')){
-    try{el.innerHTML=VIEWS[n]('');el._pk=n+':';el.classList.add('res');void el.offsetHeight}catch(_){el.innerHTML='';el._pk=null}
+    try{el.innerHTML=VIEWS[n]('');el._pk=n+':';if(n==='me')el._sig=meSig();el.classList.add('res');void el.offsetHeight}catch(_){el.innerHTML='';el._pk=null}
   }
   if(RESQ.length)setTimeout(()=>{(window.requestIdleCallback||setTimeout)(residentize,{timeout:1500})},300);
 }
@@ -2050,6 +2071,7 @@ function mountView(n){
     PX=$$('.lay2',el).map(e=>({e,v:.28,s:''}));H=n==='home'?(el._H||null):null;
     if(MQ.some(m=>!m.w))measureMQ();initPills(el);return;
   }
+  if(n==='me'&&el._pk&&el._sig!==meSig())el._pk=null;
   if(el._pk===n+':'+ARG)el.style.cssText='';else el.innerHTML=VIEWS[n](ARG);
   el._pk=null;rendered.add(n);
   reveal(el);initMQ(el);initPills(el);PX=$$('.lay2',el).map(e=>({e,v:.28,s:''}));if(n==='home')initHero(el);else H=null;
@@ -2060,7 +2082,7 @@ function setView(n,arg){
   $$('.view').forEach(v=>v.classList.toggle('on',v.dataset.view===n));
   const prev=cur;cur=n;ARG=arg||'';
   document.title=n==='mapd'?byId('map',ARG).cn+' · 瓦研社':n==='spots'?'点位库 · 瓦研社':n==='skins'?(wp(ARG)||{name:'皮肤'}).name+' 皮肤排行 · 瓦研社':TITLES[n];
-  window.scrollTo(0,0);lastY=0;py=-1;
+  window.scrollTo(0,0);lastY=0;py=-1;mxT=0;
   mountView(n);setNav(NAVOF(n),!!prev);
   if(n==='mapd'&&!HOLD)$('.view[data-view="mapd"]').classList.add('go');
 }
@@ -2070,6 +2092,7 @@ function setSpy(id){const nav=$('.view.on .mdn');if(!nav)return;let on=null;$$('
 function spyGo(id){const sec=$('#mds-'+id);if(!sec)return;spyLock=performance.now()+950;setSpy(id);window.scrollTo({top:sec.getBoundingClientRect().top+scrollY-116,behavior:'smooth'})}
 function initMapd(el){
   pushRecent(ARG);if(spyIO)spyIO.disconnect();
+  (window.requestIdleCallback||setTimeout)(()=>MAPS.slice(0,5).forEach((m,i)=>setTimeout(()=>preloadMapImg(m.id),i*160)));
   spyIO=new IntersectionObserver(es=>{if(performance.now()<spyLock)return;es.forEach(e=>{if(e.isIntersecting)setSpy(e.target.dataset.s)})},{rootMargin:'-28% 0px -62% 0px'});
   $$('.mds[data-s]',el).forEach(x=>spyIO.observe(x));
 }
@@ -2082,6 +2105,11 @@ function after(){busy=false;if(pending&&(pending.n!==cur||pending.arg!==ARG)){co
  * 一块面板盖住 → 换页 → 同方向继续扫出，是一个连续动作。面板只做 translate3d；已缓存页面几乎零等待，需要重建的页面等面板完全盖住后再挂载。 */
 const DEPTH={home:0,agents:0,items:0,tactics:0,me:0,maps:1,skins:1,spots:1,mapd:2};
 const wipe=$('#wipe'),wpn=wipe.firstElementChild;
+const ENT={home:[0,22,1],agents:[26,0,.97],items:[0,-18,1],tactics:[-26,0,.97],me:[0,26,.98]};
+function pageEnter(n,dir){
+  const v=$('.view.on');if(!v)return;const p=ENT[NAVOF(n)]||ENT.home,k=[...v.children].filter(c=>c.offsetHeight>0&&getComputedStyle(c).position!=='fixed').slice(0,6);
+  k.forEach((c,i)=>{try{c.animate([{opacity:0,transform:`translate3d(${p[0]*dir}px,${p[1]}px,0) scale(${p[2]})`},{opacity:1,transform:'none'}],{duration:620,delay:90+i*55,easing:EO,fill:'backwards'})}catch(e){}})
+}
 async function runNav(n,arg,dock){
   busy=true;setNav(NAVOF(n),true);
   const vw=innerWidth,vh=innerHeight,raf=()=>new Promise(r=>requestAnimationFrame(r));
@@ -2096,6 +2124,7 @@ async function runNav(n,arg,dock){
     if(pending&&!(pending.n===n&&pending.arg===(arg||''))){const q=pending;pending=null;n=q.n;arg=q.arg;if(n===cur&&(arg||'')===ARG){dockWant=null;setNav(NAVOF(n),true);n=null}else{setNav(NAVOF(n),true)}}   /* 快速连点：幕布盖住时直接换成最新目标，省掉中间页的挂载和整轮转场 */
     if(n!==null){if(!isCached(n,arg||''))await new Promise(r=>setTimeout(r,40));setView(n,arg)}
     await raf();
+    if(dock&&n!==null)pageEnter(n,dir);
     await wpn.animate([{transform:T(0)},{transform:T(-dir*D)}],{duration:axis==='x'?320:440,easing:EO,fill:'forwards'}).finished;
   }catch(e){}
   wpn.getAnimations().forEach(x=>x.cancel());wipe.style.visibility='hidden';after();
@@ -2387,7 +2416,7 @@ const INTRO=document.documentElement.classList.contains('introing');
 setTimeout(()=>{(window.requestIdleCallback||setTimeout)(warmMapd)},INTRO?2800:1600);
 /* 首页地图卡的大图提前在空闲时下载 + 解码，滚到地图区时不再在滚动途中才解码 */
 setTimeout(()=>{(window.requestIdleCallback||setTimeout)(residentize,{timeout:2000})},INTRO?1400:700);   /* 趁开屏动画播放期间预建，避开之后的轮播切换 */
-setTimeout(()=>{(window.requestIdleCallback||setTimeout)(()=>MAPS.slice(0,3).forEach((m,i)=>setTimeout(()=>preloadMapImg(m.id),i*250)))},INTRO?2400:1000);
+setTimeout(()=>{(window.requestIdleCallback||setTimeout)(()=>MAPS.slice(0,6).forEach((m,i)=>setTimeout(()=>preloadMapImg(m.id),i*250)))},INTRO?2400:1000);
 document.addEventListener('pointerdown',e=>{const c=e.target.closest&&e.target.closest('.mp[data-mid]');if(c)preloadMapImg(c.dataset.mid)},{passive:true});
 const boot=()=>{route();requestAnimationFrame(()=>moveLens(false))};
 requestAnimationFrame(frame);
@@ -2398,12 +2427,14 @@ Auth.restore();
 migrateLocal();
 Auth.handleCallback().then(r=>{if(r&&r.needBind)openBind();else if(r&&r.user)toast(r.isNew?'欢迎加入瓦研社':'登录成功，欢迎回来')}).catch(e=>toast(e.message||'登录失败'));
 window.WYS={Auth,CONFIG,openLogin,toast,data:{AGENTS,MAPS,UTILS,ECO,ARTICLES}};
+window.__dockGo=i=>dockGo(i);
 })();
 
 
 /* ---------------- 超椭圆（iOS 连续曲率）：原生 corner-shape 优先，否则 clip-path + 描边环 ---------------- */
 const SQ_SEL='.ib,.login-btn,.tile-ic,.x,.oa,.oa-i,.atip,.getc,.sbar-c,.fld,.mdp-back';
-const SQ_NATIVE=(()=>{try{return CSS.supports('corner-shape','squircle')}catch(e){return false}})();
+const SQ_NATIVE=(()=>{try{return CSS.supports('corner-shape','squircle')}catch(e){return false}
+})();
 function sqPath(w,h,r,o,sm){
   r=Math.min(r,w/2,h/2);if(r<=0)return `M${o} ${o}h${w}v${h}h${-w}z`;let s=sm,p=Math.min((1+s)*r,Math.min(w,h)/2);if(p<(1+s)*r)s=p/r-1;
   const R=Math.PI/180,arcM=90*(1-s),arcL=Math.sin(arcM/2*R)*r*Math.SQRT2,al=(90-arcM)/2,p34=r*Math.tan(al/2*R),be=45*s,c=p34*Math.cos(be*R),d=c*Math.tan(be*R);
@@ -2435,8 +2466,58 @@ if(!SQ_NATIVE){
   new MutationObserver(()=>{if(sqT)return;sqT=requestAnimationFrame(()=>{sqT=0;sqScan();document.querySelectorAll('.sq[data-sq]').forEach(sqDraw)})}).observe(document.body,{childList:true,subtree:true});
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>sqScan());
 }
-</script>
 
+/* 宠物菜单兜底：宠物组件在别处部署，这里不依赖它的代码。
+ * 菜单（含“隐藏宠物”）出现时，点菜单以外的任何地方 = 关闭菜单；点到 dock 时同时切换页面；并解除它可能加上的 pointer-events 封锁。 */
+(function(){
+  const TXT='隐藏宠物';let root=null,menu=null,tFind=0,closed=0,hidden=[];
+  const rectOf=e=>e.getBoundingClientRect();
+  function find(){
+    if(root&&root.isConnected&&menu&&menu.isConnected)return true;
+    const now=performance.now();if(now-tFind<600)return false;tFind=now;root=menu=null;
+    for(const c of document.body.children){
+      if(c.tagName==='SCRIPT'||c.tagName==='STYLE'||c.classList.contains('view'))continue;
+      if(c.id==='app'||c.querySelector&&c.querySelector('.view'))continue;
+      if(!(c.textContent||'').includes(TXT))continue;
+      const w=document.createTreeWalker(c,NodeFilter.SHOW_TEXT);let n;
+      while(n=w.nextNode()){if(n.nodeValue.trim()===TXT){let e=n.parentElement,m=e;for(let k=0;e&&e!==c.parentElement&&k<8;k++,e=e.parentElement){const p=getComputedStyle(e).position;if(p==='fixed'||p==='absolute'){m=e;break}}root=c;menu=m;return true}}
+    }
+    return false;
+  }
+  function open(){
+    if(!find())return false;
+    for(let e=menu;e&&e!==document.body;e=e.parentElement){const cs=getComputedStyle(e);if(cs.display==='none'||cs.visibility==='hidden'||+cs.opacity<.05)return false}
+    const r=rectOf(menu);return r.width>8&&r.height>8
+  }
+  function scrims(){const vw=innerWidth,vh=innerHeight;return [root,...root.querySelectorAll('*')].filter(e=>{if(e.contains(menu)&&e!==menu&&e!==root){}const r=rectOf(e);return e!==menu&&!menu.contains(e)&&!e.contains(menu)&&r.width>=vw*.9&&r.height>=vh*.9&&getComputedStyle(e).position==='fixed'})}
+  function close(){
+    const sc=scrims();
+    try{document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',code:'Escape',bubbles:true}))}catch(_){}
+    sc.forEach(e=>{try{e.click()}catch(_){}});
+    if(open()){hidden=[menu,...sc].filter(Boolean);hidden.forEach(e=>e.style.setProperty('display','none','important'))}
+    [document.documentElement,document.body].forEach(e=>{if(e.style.pointerEvents==='none')e.style.pointerEvents=''});
+    closed=performance.now();
+  }
+  function restore(){hidden.forEach(e=>e.style.removeProperty('display'));hidden=[]}
+  let g=null;
+  window.addEventListener('pointerdown',e=>{
+    g=null;
+    if(root&&root.contains(e.target)&&!(menu&&menu.contains(e.target))){if(hidden.length)setTimeout(restore,0);return}
+    if(!open())return;
+    if(menu.contains(e.target))return;
+    const x=e.clientX,y=e.clientY;close();
+    g={x,y,click:false,t:performance.now()};
+  },true);
+  window.addEventListener('click',()=>{if(g)g.click=true});
+  window.addEventListener('pointerup',e=>{
+    const k=g;if(!k)return;
+    const d=document.querySelector('.dock');if(!d)return;const r=d.getBoundingClientRect();
+    if(k.y<r.top||k.y>r.bottom||k.x<r.left||k.x>r.right)return;
+    setTimeout(()=>{if(k.click)return;const hit=[...d.querySelectorAll('a[data-nav]')].findIndex(a=>{const q=a.getBoundingClientRect();return k.x>=q.left&&k.x<=q.right});if(hit>=0&&window.__dockGo)window.__dockGo(hit)},120);
+  },true);
+
+})();
+</script>
 <!-- 幽影小猫 · 桌宠（出场动画 + 性能优化） -->
 <style>
 /* 幽影小猫 · 站内搭件（独立于主站样式，全部 wysPet 前缀） */
