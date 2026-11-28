@@ -1076,6 +1076,7 @@ a[data-h]{cursor:pointer}
 .mgu>p{margin-bottom:20px}
 .mrow.kf{margin-top:14px;padding:14px;color:inherit;text-decoration:none}
 .mrow.kf span b{font-size:15px;letter-spacing:.04em}
+.mrow.kf i.qq{color:#12B7F5;background:rgba(18,183,245,.12)}
 
 /* 绑定手机号：与登录页同一套头图，返回按钮叠在头图左上，表单留足呼吸感 */
 .sheet.auth .astep[data-step=bind]{position:relative}
@@ -1479,7 +1480,7 @@ function homeView(){
     'https://i.imgs.ovh/2026/11/28/6074b6051dc1f2bfaee294cb77f95f4b.jpg'
   ];
   /* 海报位跳转：0 点位库保持站内路由；1 准星工坊/灵敏度分享；2 皮肤排名（页面为空，走广告位出租）；3 广告位出租 */
-  const POSTER_HREFS=['#/items','https://wayanshe.xyz/zx','https://wayanshe.xyz/gg','https://wayanshe.xyz/gg'];
+  const POSTER_HREFS=['#/items','#/agents','#/maps','#/tactics'];
   const tiles=[['items','点位库','按特工 / 地图查看点位','items','SPOTS'],['agents','特工图鉴',`${AGENTS.length} 位特工 · 四类职责` ,'agent','AGENTS'],['maps','地图解析',`${MAPS.length} 张地图`,'map','MAPS'],['tactics','皮肤排名','按武器分类的皮肤榜','skin','SKINS']];
   return `<div class="hero" id="hero" aria-roledescription="carousel">${slides}
    <div class="hero-out">${mqHTML(['VALORANT','MOBILE','无畏契约'],'mq-out',26,'r')}</div><span class="cr tl"></span>
@@ -1585,7 +1586,7 @@ const VIEWS={
  me(){
   const u=Auth.user,f=favs();
   const go=(h,i,t,d)=>`<button class="mrow" data-go="${h}"><i>${ic(i)}</i><span><b>${t}</b><em>${d}</em></span>${ic('arrow')}</button>`;
-  const links=`<a class="mrow kf" href="https://qm.qq.com/q/Pr6dKRC3m4" target="_blank" rel="noopener"><i>${ic('user')}</i><span><b>联系客服</b></span>${ic('arrow')}</a>`;
+  const links=`<a class="mrow kf" href="https://qm.qq.com/q/Pr6dKRC3m4" target="_blank" rel="noopener"><i class="qq">${QQ}</i><span><b>联系客服</b></span>${ic('arrow')}</a>`;
   if(!u)return `<div class="mep wrap"><div class="mgu rv"><span class="mgu-l">${ic('user')}</span><h2>登录瓦研社</h2><p>同步收藏，换设备也不丢</p><button class="btn" data-login><span>微信 / QQ 登录</span></button></div>${links}${footer()}</div>`;
   const favItems=f.map(k=>{const[t,id]=k.split(':');const o=byId(t,id);return o?`<button class="chip" data-open="${k}">${esc(o.name||o.cn||o.n||o.title)}</button>`:''}).join('');
   return `<div class="mep wrap"><div class="mhd rv"><div class="av">${u.avatar?`<img src="${esc(u.avatar)}" alt="">`:esc((u.nickname||'瓦')[0].toUpperCase())}</div><div class="mhd-t"><h2>${esc(u.nickname||'玩家')}</h2><p>Lv.${esc(u.level??1)} · ID ${esc(u.id??'—')}${u.phone?' · '+esc(u.phone):''}</p></div><button class="mhd-o" data-logout aria-label="退出登录">${ic('out')}</button></div>
