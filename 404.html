@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -1049,7 +1050,7 @@ a[data-h]{cursor:pointer}
 .sl{visibility:visible!important;transition:opacity .8s var(--ease)!important;will-change:opacity;contain:layout paint style}   /* 三张轮播始终保持已栅格化：切换时只做合成器透明度渐变，不再现场栅格化 */
 .sl:not(.on){pointer-events:none}
 .sl:not(.on) *{animation-play-state:paused!important}
-.tile.poster{padding:0}.tile.poster::before,.tile.poster::after{display:none!important}.tile.poster,.tile.poster:active{transform:none!important;transition:none}
+.tile.poster{padding:0}.tile.poster::before,.tile.poster::after{display:none!important}.tile.poster{transition:none}.tile.poster:active{transform:none}
 .dpill{position:absolute;left:0;top:0;z-index:0;border-radius:999px;pointer-events:none;will-change:transform,opacity;backface-visibility:hidden;background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.1));box-shadow:none}
 .dgc{position:absolute;inset:0;z-index:0;border-radius:999px;overflow:hidden;pointer-events:none}
 .dtrail{position:absolute;left:0;top:0;border-radius:999px;pointer-events:none;opacity:0;will-change:transform,opacity;backface-visibility:hidden;background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.035));filter:blur(1.2px);box-shadow:none}
@@ -1094,7 +1095,10 @@ a[data-h]{cursor:pointer}
 
 /* 首页海报位：整张图铺满，标题压在底部渐变上 */
 .tile.poster{position:relative;overflow:hidden;background:#0b0b10}
-.tp-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.tp-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;opacity:0;transform:scale(1.06);transition:opacity .6s ease,transform 1.1s var(--ease)}
+.tp-img.ok{opacity:1;transform:none}
+@keyframes tin{from{opacity:0;transform:translate3d(0,42px,0) scale(.94)}}
+.tile.poster.rv.in{animation:tin .9s var(--ease) calc(var(--i,0)*110ms + 60ms) backwards}
 .tp-t{position:absolute;left:0;right:0;bottom:0;padding:34px 14px 14px;font-size:17px;font-weight:900;line-height:1.25;font-style:italic;letter-spacing:.04em;color:#fff;background:linear-gradient(180deg,transparent,rgba(5,5,8,.82));text-shadow:0 2px 10px rgba(0,0,0,.6)}
 /* 后台常驻页里的无限动画全部暂停，不占合成器 */
 .view.res:not(.on) *,.view.res:not(.on) *::before,.view.res:not(.on) *::after{animation-play-state:paused!important}
@@ -1915,7 +1919,9 @@ let lastDockIndex=-1,navCur='',dockWant=null,dAnims=[],dTok=0,dMoveEl=dpill;
 const tabX=i=>db[i]?db[i].offsetLeft:0,tx=x=>`translate3d(${x}px,0,0)`;
 const curX=el=>{try{return new DOMMatrix(getComputedStyle(el).transform).m41}catch(_){return 0}};
 function dkReadX(el){
-  try{const m=new DOMMatrix(getComputedStyle(el).transform);return Number.isFinite(m.m41)?m.m41:0}catch(_){return 0}
+  /* 读到的位置必须落在 dock 范围内，否则（样式尚未应用 / 布局抖动）退回到上一个已知目标，杜绝“飞回旧格”的异常读数 */
+  const lo=tabX(0)-4,hi=tabX(NT-1)+4,fb=tabX(Math.max(0,lastDockIndex));
+  try{const m=new DOMMatrix(getComputedStyle(el).transform);return Number.isFinite(m.m41)&&m.m41>=lo&&m.m41<=hi?m.m41:fb}catch(_){return fb}
 }
 function dkCancelKeep(){
   /* 先读取合成器上的真实画面位置，再写回内联样式，最后取消旧动画；
@@ -1973,7 +1979,7 @@ function dkMove(i,anim){
       dpill.style.transform=tx(x1);
       const cur=+getComputedStyle(dgoo).opacity,g=dgoo.animate([{opacity:cur},{opacity:0}],{duration:160,easing:'linear',fill:'forwards'}),pl=dpill.animate([{opacity:0},{opacity:1}],{duration:160,easing:'linear',fill:'forwards'});
       dAnims.push(g,pl);
-      Promise.all([A.finished,B.finished,g.finished,pl.finished]).then(()=>{if(tok===dTok)dkCommit(x1)}).catch(()=>{});
+      Promise.all([A.finished,B.finished,g.finished,pl.finished]).then(()=>{if(tok===dTok)dkCommit(tabX(lastDockIndex>=0?lastDockIndex:i))}).catch(()=>{});
     },Math.round(D*.52));
   }else{
     dMoveEl=dpill;
@@ -1987,7 +1993,7 @@ function dkMove(i,anim){
     const tail=dtrail?dtrail.animate([{transform:tx(from),opacity:.22},{transform:tx(x1),opacity:0}],{duration:D+58,delay:16,easing:DOCK_FOLLOW,fill:'forwards'}):null;
     const fo=dpill.animate([{opacity:po},{opacity:1}],{duration:go>.01?120:1,easing:'linear',fill:'forwards'}),fg=dgoo.animate([{opacity:go},{opacity:0}],{duration:120,easing:'linear',fill:'forwards'});
     dAnims=tail?[main,tail,fo,fg]:[main,fo,fg];
-    Promise.all(dAnims.map(a=>a.finished)).then(()=>{if(tok===dTok)dkCommit(x1)}).catch(()=>{});
+    Promise.all(dAnims.map(a=>a.finished)).then(()=>{if(tok===dTok)dkCommit(tabX(lastDockIndex>=0?lastDockIndex:i))}).catch(()=>{});
   }
 }
 let prevIdx=-1;const lastFrom=()=>tabX(Math.max(0,prevIdx));
@@ -2006,7 +2012,8 @@ function dockVis(i){
 function moveLens(anim){
   if(DESK)return;
   const a=$('a.on',dock);if(!a)return;const i=db.indexOf(a);
-  if(!anim){prevIdx=lastDockIndex=i;dkLayout();dkPlace(i);return}
+  /* 窗口/地址栏伸缩、字体就绪等“无动画校准”绝不能打断正在进行的指示器动画（否则会瞬间吸附 → 看起来像跳） */
+  if(!anim){if(dAnims.length){dkLayout();return}prevIdx=lastDockIndex=i;dkLayout();dkPlace(i);return}
   if(lastDockIndex===i)return;
   prevIdx=lastDockIndex;lastDockIndex=i;dkMove(i,prevIdx>=0);
 }
@@ -2062,6 +2069,20 @@ const imgNear=new IntersectionObserver(es=>es.forEach(e=>{
   if(imgSeen.has(im))return;imgSeen.add(im);imgQ.push(im);imgPump()
 }),{rootMargin:'1200px 700px 1200px 700px'});
 function reveal(root){
+  /* 海报原图通常是 1500px+ 的大图：整张解码、上传 GPU、滚动时合成都很重。这里在后台线程把它缩到“显示尺寸 ×2”再画进小画布，
+     滚动时只合成一张小纹理；缩放失败（不支持 / 跨域限制）就退回原图，只做淡入 */
+  $$('.tp-img',root).forEach(im=>{
+    const show=el=>requestAnimationFrame(()=>el.classList.add('ok'));
+    const ok=()=>{
+      const W=Math.round(Math.min((im.parentNode.clientWidth||innerWidth*.92),760)*Math.min(devicePixelRatio||1,2));
+      if(!window.createImageBitmap||!im.naturalWidth||im.naturalWidth<=W*1.25){(im.decode?im.decode():Promise.resolve()).catch(()=>{}).then(()=>show(im));return}
+      createImageBitmap(im,{resizeWidth:W,resizeQuality:'medium'}).then(bm=>{
+        const cv=document.createElement('canvas');cv.width=bm.width;cv.height=bm.height;cv.className='tp-img';cv.setAttribute('aria-hidden','true');
+        cv.getContext('2d').drawImage(bm,0,0);if(bm.close)bm.close();
+        im.style.display='none';im.after(cv);show(cv)
+      }).catch(()=>show(im))
+    };
+    if(im.complete&&im.naturalWidth)ok();else{im.addEventListener('load',ok,{once:true});im.addEventListener('error',()=>im.classList.add('ok'),{once:true})}});
   $$('.mp',root).forEach(el=>mpNear.observe(el));
   $$('img[loading=lazy]',root).forEach(im=>{if(!im.closest('.mp'))imgNear.observe(im)});
   $$('[data-stagger]',root).forEach(p=>[...p.children].forEach((c,i)=>{c.classList.add('rv');c.style.setProperty('--i',Math.min(i,7))}));
@@ -2468,12 +2489,23 @@ function dockGo(i){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{if(tok!==dockTok)return;
     if(location.hash!=='#/'+n){DOCKNAV=true;location.hash='#/'+n}else{DOCKNAV=false;setNav(n,true);if(!busy&&NAVOF(cur)===n)dockWant=null}}));
 }
+/* 自愈：转场全部结束、没有排队的路由后，指示器 / 高亮必须与“当前页面”一致；不一致就平滑归位（兜底任何竞态造成的错位 / 乱跳） */
+let recT=0;
+function dockReconcile(){
+  clearTimeout(recT);
+  recT=setTimeout(function chk(){
+    if(busy||pending||dockP||dAnims.length){recT=setTimeout(chk,350);return}
+    const want=db.findIndex(a=>a.dataset.nav===NAVOF(cur));if(want<0)return;
+    dockWant=null;
+    if(!db[want].classList.contains('on')||lastDockIndex!==want){dockSetActive(want);if(lastDockIndex!==want){prevIdx=lastDockIndex;lastDockIndex=want;dkMove(want,prevIdx>=0)}}
+  },900);
+}
 /* dock：只响应点击切换，不跟手滑 */
 dock.addEventListener('click',e=>{
   const a=e.target.closest('a[data-nav]');if(!a)return;
   e.preventDefault();e.stopPropagation();
   const i=NAV.findIndex(n=>n[0]===a.dataset.nav);
-  if(i>=0)dockGo(i);
+  if(i>=0){dockWant=NAV[i][0];dockVis(i);dockGo(i);dockReconcile()}   /* 指示器在点下的这一刻就开始动，不再等路由回调：路由可能因转场进行中而排队 / 被丢弃，动画就“时有时无” */
 });
 let rz,rl,lastW=innerWidth;window.addEventListener('resize',()=>{if(innerWidth===lastW)return;lastW=innerWidth;   /* 只变高度（键盘弹出 / 地址栏收放）不重算：否则搜索展开时会撞上整页重排 */
   cancelAnimationFrame(rz);rz=requestAnimationFrame(()=>{MQ.forEach(m=>{m.w=0;if(m.anim){m.anim.cancel();m.anim=null}});measureMQ();moveLens(false);$$('.chips').forEach(b=>pillTo(b,false))});clearTimeout(rl);rl=setTimeout(()=>{if($('#top').classList.contains('lg'))buildLG();if(dock.classList.contains('lg'))buildDockLG()},200)});
@@ -2585,71 +2617,6 @@ if(!SQ_NATIVE){
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>sqScan());
 }
 
-/* 宠物兜底：宠物组件在别处部署，这里不依赖它的代码。
- * ① 菜单（含“隐藏宠物”）打开时，点菜单以外的任何地方 = 只关闭菜单，不会误触下面的按钮；点 dock 则关闭并切换页面。
- * ② 宠物图片加载完成后才出场（带入场动画），不会先露出空壳。
- * 隐藏 / 等待都只通过 class 叠加，不改宠物自己的 inline style，避免破坏它的状态。 */
-(function(){
-  const TXT='隐藏宠物',st=document.createElement('style');
-  st.textContent='.wys-pet-hide{visibility:hidden!important;opacity:0!important;pointer-events:none!important}.wys-pet-wait{opacity:0!important;pointer-events:none!important}';
-  document.head.appendChild(st);
-  let root=null,menu=null,tFind=0,hidden=[];
-  function find(force){
-    if(root&&root.isConnected&&menu&&menu.isConnected)return true;
-    const now=performance.now();if(!force&&now-tFind<500)return false;tFind=now;root=menu=null;
-    for(const c of document.body.children){
-      if(c.tagName==='SCRIPT'||c.tagName==='STYLE'||c.querySelector('.view'))continue;
-      if(!(c.textContent||'').includes(TXT))continue;
-      const w=document.createTreeWalker(c,NodeFilter.SHOW_TEXT);let n;
-      while(n=w.nextNode()){if(n.nodeValue.trim()===TXT){let e=n.parentElement,m=e;for(let k=0;e&&e!==c.parentElement&&k<8;k++,e=e.parentElement){const p=getComputedStyle(e).position;if(p==='fixed'||p==='absolute'){m=e;break}}root=c;menu=m;return true}}
-    }
-    return false;
-  }
-  /* ② 图片加载完再出场 */
-  let gated=new WeakSet();
-  function gate(){
-    if(!find(true)||gated.has(root))return;gated.add(root);
-    const im=root.querySelector('img');if(!im||(im.complete&&im.naturalWidth))return;
-    root.classList.add('wys-pet-wait');
-    const show=()=>{if(!root.classList.contains('wys-pet-wait'))return;root.classList.remove('wys-pet-wait');
-      try{(im.isConnected?im:root).animate([{opacity:0,transform:'translate3d(0,28px,0) scale(.55)'},{opacity:1,transform:'translate3d(0,-6px,0) scale(1.06)',offset:.7},{opacity:1,transform:'none'}],{duration:620,easing:'cubic-bezier(.22,1,.36,1)'})}catch(_){}};
-    im.addEventListener('load',()=>(im.decode?im.decode().catch(()=>{}):Promise.resolve()).then(show),{once:true});
-    im.addEventListener('error',show,{once:true});setTimeout(show,8000);
-  }
-  new MutationObserver(()=>{if(!root||!root.isConnected)gate()}).observe(document.body,{childList:true});
-  [0,400,1200,3000].forEach(t=>setTimeout(gate,t));
-  /* ① 菜单外点击 */
-  function open(){
-    if(!find())return false;
-    for(let e=menu;e&&e!==document.body;e=e.parentElement){const cs=getComputedStyle(e);if(cs.display==='none'||cs.visibility==='hidden'||+cs.opacity<.05)return false}
-    const r=menu.getBoundingClientRect();if(r.width>8&&r.height>8){menu.style.webkitBackfaceVisibility='hidden';menu.style.backfaceVisibility='hidden';return true}return false
-  }
-  function scrims(){const vw=innerWidth,vh=innerHeight;return [root,...root.querySelectorAll('*')].filter(e=>{if(e===menu||menu.contains(e)||e.contains(menu))return false;const r=e.getBoundingClientRect();return r.width>=vw*.9&&r.height>=vh*.9&&getComputedStyle(e).position==='fixed'})}
-  function close(){
-    const sc=scrims();
-    try{document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',code:'Escape',bubbles:true}))}catch(_){}
-    sc.forEach(e=>{try{e.click()}catch(_){}});
-    if(open()){hidden=[menu,...sc];hidden.forEach(e=>e.classList.add('wys-pet-hide'))}
-    [document.documentElement,document.body].forEach(e=>{if(e.style.pointerEvents==='none')e.style.pointerEvents=''});
-  }
-  const restore=()=>{hidden.forEach(e=>e.classList.remove('wys-pet-hide'));hidden=[]};
-  let g=null;
-  const inDock=(x,y)=>{const d=document.querySelector('.dock');if(!d)return false;const r=d.getBoundingClientRect();return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom};
-  window.addEventListener('pointerdown',e=>{
-    g=null;
-    if(root&&root.contains(e.target)&&!(menu&&menu.contains(e.target))){if(hidden.length)setTimeout(restore,30);return}
-    if(!open()||menu.contains(e.target))return;
-    const x=e.clientX,y=e.clientY;close();
-    g={x,y,dock:inDock(x,y),click:false};
-  },true);
-  const swallow=e=>{if(g&&!g.dock){e.stopPropagation();e.preventDefault()}};
-  window.addEventListener('click',e=>{if(g){g.click=true;swallow(e)}},true);
-  window.addEventListener('pointerup',e=>{
-    const k=g;if(!k)return;
-    if(!k.dock){swallow(e);return}
-    setTimeout(()=>{if(k.click)return;const d=document.querySelector('.dock'),hit=[...d.querySelectorAll('a[data-nav]')].findIndex(a=>{const q=a.getBoundingClientRect();return k.x>=q.left&&k.x<=q.right});if(hit>=0&&window.__dockGo)window.__dockGo(hit)},120);
-  },true);
-})();
 </script>
 <!-- 幽影小猫 · 桌宠（出场动画 + 性能优化） -->
 <style>
@@ -2673,12 +2640,12 @@ if(!SQ_NATIVE){
 html.wysPetOpen .dock{z-index:206}
 html.wysPetOpen #wysPetLayer{z-index:207}
 #wysPetMenuAnchor{position:fixed;left:0;top:0;z-index:211;transform:translate(-50%,-100%);pointer-events:none}
-#wysPetMenu{position:relative;width:42px;height:42px;border-radius:999px;overflow:hidden;opacity:0;visibility:hidden;background:rgba(10,10,16,.98);border:1px solid rgba(255,255,255,.14);box-shadow:0 16px 38px rgba(0,0,0,.62);backdrop-filter:blur(12px);pointer-events:auto;transition:width .46s cubic-bezier(.32,.72,0,1),height .46s cubic-bezier(.32,.72,0,1),border-radius .46s cubic-bezier(.32,.72,0,1),opacity .32s ease,visibility .32s}
+#wysPetMenu{position:relative;width:42px;height:42px;border-radius:999px;overflow:hidden;opacity:0;visibility:hidden;background:rgba(10,10,16,.98);border:1px solid rgba(255,255,255,.14);box-shadow:0 16px 38px rgba(0,0,0,.62);pointer-events:auto;transition:width .46s cubic-bezier(.32,.72,0,1),height .46s cubic-bezier(.32,.72,0,1),border-radius .46s cubic-bezier(.32,.72,0,1),opacity .32s ease,visibility .32s}
 #wysPetMenu.show{opacity:1;visibility:visible}
 #wysPetMenu.open{width:136px;height:158px;border-radius:16px}
 #wysPetMenu.fading{opacity:0;pointer-events:none}
-#wysPetMenuList{position:absolute;inset:6px;display:flex;flex-direction:column;gap:3px;opacity:0;transform:translateY(10px) scale(.97);filter:blur(7px);transition:opacity .3s ease,transform .3s ease,filter .3s ease}
-#wysPetMenu.open #wysPetMenuList{opacity:1;transform:none;filter:none;transition-delay:.1s}
+#wysPetMenuList{position:absolute;inset:6px;display:flex;flex-direction:column;gap:3px;opacity:0;transform:translateY(10px) scale(.97);transition:opacity .3s ease,transform .3s ease}
+#wysPetMenu.open #wysPetMenuList{opacity:1;transform:none;transition-delay:.1s}
 #wysPetMenu button{appearance:none;border:1px solid transparent;background:transparent;color:#d8d8e2;height:34px;padding:0 10px;border-radius:9px;font-size:12px;text-align:left;cursor:pointer;font-family:inherit;white-space:nowrap;flex:0 0 auto}
 #wysPetMenu button:hover,#wysPetMenu button:active{background:rgba(255,255,255,.09)}
 #wysPetBack{position:fixed;right:12px;bottom:calc(86px + var(--safeB,0px));z-index:46;display:none;align-items:center;justify-content:center;width:52px;height:52px;padding:0;border:0;background:none;cursor:pointer;pointer-events:auto;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;filter:drop-shadow(0 6px 14px rgba(0,0,0,.55))}
@@ -3132,7 +3099,7 @@ html.wysPetOpen #wysPetLayer{z-index:207}
     window.addEventListener('pointercancel', onUp);
     pet.addEventListener('contextmenu', function (e) { e.preventDefault(); openMenu(); });
     document.addEventListener('pointerdown', function (e) {
-      if (!menu.contains(e.target) && e.target !== pet) closeMenu();
+      if (!menu.contains(e.target) && e.target !== pet && e.target !== shade) closeMenu();
     }, true);
     menu.addEventListener('click', function (e) {
       var btn = e.target.closest ? e.target.closest('button') : null;
